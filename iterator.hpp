@@ -2,6 +2,13 @@
 #define ITERATOR_HPP
 
 namespace ft {
+
+struct input_iterator_tag;
+struct output_iterator_tag;
+struct forward_iterator_tag;
+struct bidirectional_iterator_tag;
+struct random_access_iterator_tag;
+
 template <class Iter>
 class iterator_traits {
   typedef typename Iter::difference_type difference_type;
@@ -39,7 +46,7 @@ class reverse_iterator
  protected:
   _Iterator current;
 
-  typedef iterator_traits<_Iterator> _traits_type;
+  typedef iterator_traits<_Iterator> __traits_type;
 
  public:
   typedef _Iterator iterator_type;
