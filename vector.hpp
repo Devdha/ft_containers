@@ -69,6 +69,7 @@ __vector_base<_T, _Allocator>::__vector_base(const allocator_type& __a)
 template <class _T, class _Allocator>
 __vector_base<_T, _Allocator>::~__vector_base() {
   if (__begin_ != nullptr) {
+    clear();
     __alloc_traits::deallocate(__alloc(), __begin_, capacity());
   }
 }
