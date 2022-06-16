@@ -20,8 +20,8 @@ class __vector_base {
 
  protected:
   typedef _T                                       value_type;
-  typedef value_type&                              reference;
-  typedef const value_type&                        const_reference;
+  typedef value_type                              &reference;
+  typedef const value_type                        &const_reference;
   typedef typename __alloc_traits::difference_type difference_type;
   typedef typename __alloc_traits::pointer         pointer;
   typedef typename __alloc_traits::const_pointer   const_pointer;
@@ -34,11 +34,11 @@ class __vector_base {
   allocator_type __end_cap_alloc_type_;
 
   __vector_base() _NOEXCEPT;
-  __vector_base(const allocator_type& __a);
+  __vector_base(const allocator_type &__a);
   ~__vector_base();
 
-  allocator_type&       __alloc() _NOEXCEPT { return __end_cap_alloc_type_; }
-  const allocator_type& __alloc() const _NOEXCEPT {
+  allocator_type       &__alloc() _NOEXCEPT { return __end_cap_alloc_type_; }
+  const allocator_type &__alloc() const _NOEXCEPT {
     return __end_cap_alloc_type_;
   }
   size_type capacity() const _NOEXCEPT {
@@ -60,7 +60,7 @@ __vector_base<_T, _Allocator>::__vector_base() _NOEXCEPT
       __end_cap_alloc_type_(__default_init_tag()) {}
 
 template <typename _T, typename _Allocator>
-__vector_base<_T, _Allocator>::__vector_base(const allocator_type& __a)
+__vector_base<_T, _Allocator>::__vector_base(const allocator_type &__a)
     : __begin_(nullptr),
       __end_(nullptr),
       __end_cap_pointer_(nullptr),
@@ -75,7 +75,22 @@ __vector_base<_T, _Allocator>::~__vector_base() {
 }
 
 template <class _T, class _Allocator>
-class vector : private __vector_base<_T, _Allocator> {};
+class vector : private __vector_base<_T, _Allocator> {
+ private:
+  typedef __vector_base<_T, _Allocator> _base;
+  typedef vector<_T, _Allocator>        vector_type;
+
+ public:
+  typedef _T                                            value_type;
+  typedef value_type                                   *pointer;
+  typedef const value_type                             *const_pointer;
+  typedef __normal_iterator<pointer, vector_type>       iterator;
+  typedef __normal_iterator<const_pointer, vector_type> const_iterator;
+  typedef value_type                                   &reference;
+  typedef const value_type                             &const_reference;
+  typedef size_t                                        size_type;
+  typedef ptrdiff_t                                     difference_type;
+};
 
 }  // namespace ft
 
