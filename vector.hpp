@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <stdexcept>
 
 #include "iterator.hpp"
 
@@ -82,6 +83,9 @@ class vector : private __vector_base<_T, _Allocator> {
 
   iterator       __make_iter(pointer __p) { return iterator(__p); }
   const_iterator __make_iter(const_pointer __p) { return const_iterator(__p); }
+  void           __range_check(size_type __n) const {
+              if (__n >= this->size()) std::__throw_out_of_range("vector");
+  }
 
  public:
   typedef _T                                            value_type;
@@ -97,9 +101,10 @@ class vector : private __vector_base<_T, _Allocator> {
   typedef reverse_iterator<const_iterator>              const_reverse_iterator;
   typedef reverse_iterator<iterator>                    reverse_iterator;
 
-  explicit vector(const allocator_type &alloc = allocator_type());
-  explicit vector(size_type n, const value_type &val = value_type(),
-                  const allocator_type &alloc = allocator_type());
+  explicit vector(const allocator_type &__a = allocator_type()) : _base(_a) {}
+  explicit vector(size_type __n, const _T &__value,
+                  const allocator_type &__a = allocator_type())
+      : _base(__n, __a) {}
   template <class InputIterator>
   vector(InputIterator first, InputIterator last,
          const allocator_type &alloc = allocator_type());
@@ -109,32 +114,49 @@ class vector : private __vector_base<_T, _Allocator> {
 
   vector &operator=(const vector &x);
 
-  iterator       begin();
-  const_iterator begin() const;
-  iterator       end();
-  const_iterator end() const;
+  iterator       begin() { return __make_iter(this->__begin_); }
+  const_iterator begin() const { return __make_iter(this->__begin_); }
+  iterator       end() { return __make_iter(this->__end_); }
+  const_iterator end() const { return __make_iter(this->__end_); }
 
-  reverse_iterator       rbegin();
-  const_reverse_iterator rbegin() const;
-  reverse_iterator       rend();
-  const_reverse_iterator rend() const;
+  reverse_iterator       rbegin() { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+  reverse_iterator       rend() { return reverse_iterator(begin()); }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
 
-  size_type size() const;
+  size_type size() const { return size_type(end() - begin()); }
   void      resize(size_type n, value_type val = value_type());
-  size_type max_size() const;
-  size_type capacity() const;
-  bool      empty() const;
-  void      reserve(size_type n);
+  size_type max_size() const { return size_type(-1) / sizeof(_T); }
+  size_type capacity() const {
+    return size_type(const_iterator(_base::__end_cap_alloc_type_ - begin());
+  }
+  bool empty() const { return begin() == end(); }
+  void reserve(size_type n);
 
-  reference       operator[](size_type n);
-  const_reference operator[](size_type n) const;
-  reference       at(size_type n);
-  const_reference at(size_type n) const;
+  reference operator[](size_type __n) {
+    if (__n >= size()) this->__throw_out_of_range();
+    return this->__begin_[__n];
+  }
+  const_reference operator[](size_type __n) const {
+    return this->__begin_[__n];
+  }
+  reference at(size_type __n) {
+    __range_check(__n);
+    return (*this)[__n];
+  }
+  const_reference at(size_type n) const {
+    __range_check(__n);
+    return (*this)[__n];
+  }
 
-  reference       front();
-  const_reference front() const;
-  reference       back();
-  const_reference back() const;
+  reference       front() { return *begin(); }
+  const_reference front() const { return *begin(); }
+  reference       back() { return *(end() - 1); }
+  const_reference back() const { return *(end() - 1); }
 
   template <class InputIterator>
   void assign(InputIterator first, InputIterator last);
