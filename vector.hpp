@@ -15,9 +15,9 @@ namespace ft {
 template <typename _T, typename _Allocator>
 class __vector_base {
  public:
-  typedef _Allocator                         allocator_type;
-  typedef allocator_traits<allocator_type>   __alloc_traits;
-  typedef typename __alloc_traits::size_type size_type;
+  typedef _Allocator                            allocator_type;
+  typedef std::allocator_traits<allocator_type> __alloc_traits;
+  typedef typename __alloc_traits::size_type    size_type;
 
  protected:
   typedef _T                                       value_type;
@@ -58,7 +58,7 @@ __vector_base<_T, _Allocator>::__vector_base() _NOEXCEPT
     : __begin_(nullptr),
       __end_(nullptr),
       __end_cap_pointer_(nullptr),
-      __end_cap_alloc_type_(__default_init_tag()) {}
+      __end_cap_alloc_type_(std::__default_init_tag()) {}
 
 template <typename _T, typename _Allocator>
 __vector_base<_T, _Allocator>::__vector_base(const allocator_type &__a)
@@ -81,11 +81,11 @@ class vector : private __vector_base<_T, _Allocator> {
   typedef __vector_base<_T, _Allocator> _base;
   typedef vector<_T, _Allocator>        vector_type;
 
-  iterator       __make_iter(pointer __p) { return iterator(__p); }
-  const_iterator __make_iter(const_pointer __p) { return const_iterator(__p); }
-  void           __range_check(size_type __n) const {
-              if (__n >= this->size()) std::__throw_out_of_range("vector");
-  }
+ protected:
+  using _base::__begin_;
+  using _base::__end_;
+  using _base::__end_cap_alloc_type_;
+  using _base::__end_cap_pointer_;
 
  public:
   typedef _T                                            value_type;
@@ -101,7 +101,15 @@ class vector : private __vector_base<_T, _Allocator> {
   typedef reverse_iterator<const_iterator>              const_reverse_iterator;
   typedef reverse_iterator<iterator>                    reverse_iterator;
 
-  explicit vector(const allocator_type &__a = allocator_type()) : _base(_a) {}
+ private:
+  iterator       __make_iter(pointer __p) { return iterator(__p); }
+  const_iterator __make_iter(const_pointer __p) { return const_iterator(__p); }
+  void           __range_check(size_type __n) const {
+              if (__n >= this->size()) std::__throw_out_of_range("vector");
+  }
+
+ public:
+  explicit vector(const allocator_type &__a = allocator_type()) : _base(__a) {}
   explicit vector(size_type __n, const _T &__value,
                   const allocator_type &__a = allocator_type())
       : _base(__n, __a) {}
@@ -132,7 +140,7 @@ class vector : private __vector_base<_T, _Allocator> {
   void      resize(size_type n, value_type val = value_type());
   size_type max_size() const { return size_type(-1) / sizeof(_T); }
   size_type capacity() const {
-    return size_type(const_iterator(_base::__end_cap_alloc_type_ - begin());
+    return size_type(const_iterator(__end_cap_alloc_type_ - begin()));
   }
   bool empty() const { return begin() == end(); }
   void reserve(size_type n);
@@ -148,7 +156,7 @@ class vector : private __vector_base<_T, _Allocator> {
     __range_check(__n);
     return (*this)[__n];
   }
-  const_reference at(size_type n) const {
+  const_reference at(size_type __n) const {
     __range_check(__n);
     return (*this)[__n];
   }
@@ -169,7 +177,7 @@ class vector : private __vector_base<_T, _Allocator> {
   iterator erase(const_iterator position);
   iterator erase(const_iterator first, const_iterator last);
   void     swap(vector &x);
-  void     clear() noexcept;
+  void     clear() throw();
 
   allocator_type get_allocator() const { return _base::__alloc(); }
 };

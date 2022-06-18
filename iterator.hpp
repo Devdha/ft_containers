@@ -55,7 +55,7 @@ struct iterator_traits<const T*> {
 template <class _Iter>
 class reverse_iterator
     : public iterator<typename iterator_traits<_Iter>::iterator_category,
-                      typename iterator_traits<_Iter>::value_type
+                      typename iterator_traits<_Iter>::value_type,
                       typename iterator_traits<_Iter>::difference_type,
                       typename iterator_traits<_Iter>::pointer,
                       typename iterator_traits<_Iter>::reference> {
@@ -85,8 +85,8 @@ class reverse_iterator
 
   iterator_type base() const { return current; }
   reference     operator*() const {
-    iterator_type __i(current);
-    return *--__i;
+        iterator_type __i(current);
+        return *--__i;
   }
   pointer           operator->() const { return &(operator*()); }
   reverse_iterator& operator++() {
