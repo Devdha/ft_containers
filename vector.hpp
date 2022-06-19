@@ -113,24 +113,53 @@ class vector : private __vector_base<_T, _Allocator> {
 
  private:
   iterator       __make_iter(pointer __p) { return iterator(__p); }
-  const_iterator __make_iter(const_pointer __p) { return const_iterator(__p); }
-  void           __range_check(size_type __n) const {
-              if (__n >= this->size()) std::__throw_out_of_range("vector");
+  const_iterator __make_iter(const_pointer __p) const {
+    return const_iterator(__p);
+  }
+  void __range_check(size_type __n) const {
+    if (__n >= this->size()) std::__throw_out_of_range("vector");
   }
 
  public:
   explicit vector(const allocator_type &__a = allocator_type()) : _base(__a) {}
+
   explicit vector(size_type __n, const _T &__value,
                   const allocator_type &__a = allocator_type())
-      : _base(__n, __a) {}
+      : _base(__n, __a) {
+    __end_ = uninitialized_fill_n(__begin_, __n, __value);
+  }
+
   template <class InputIterator>
-  vector(InputIterator first, InputIterator last,
-         const allocator_type &alloc = allocator_type());
-  vector(const vector &x);
+  vector(InputIterator __first, InputIterator __last,
+         const allocator_type &__a = allocator_type())
+      : _base(__a) {
+    size_type __n = distance(__first, __last);
+    __begin_ = _base::__alloc_traits::allocator(__n);
+    __end_ = __begin_ + __n;
+    __end_cap_pointer_ = __begin_ + __n;
+    for (; __first != __last; ++__first) push_back(*__first);
+  }
 
-  ~vector() {}
+  vector(const vector<_T, _Allocator> &__x)
+      : _base(__x.size(), __x.get_allocator()) {
+    __end_ = uninitialized_copy(__x.begin(), __x.end(), __begin_);
+  }
 
-  vector &operator=(const vector &x);
+  ~vector() {
+    if (this->__begin_) {
+      clear();
+      __end_cap_alloc_type_.deallocate(__begin_, this->capacity());
+      __begin_ = __end_ = __end_cap_pointer_ = NULL;
+    }
+  }
+
+  vector &operator=(const vector &__x) {
+    if (&__x != this) {
+      const size_type __xlen = __x.size();
+      if (__xlen > capacity()) {
+      }
+    }
+  }
 
   iterator       begin() { return __make_iter(this->__begin_); }
   const_iterator begin() const { return __make_iter(this->__begin_); }
@@ -150,7 +179,7 @@ class vector : private __vector_base<_T, _Allocator> {
   void      resize(size_type n, value_type val = value_type());
   size_type max_size() const { return size_type(-1) / sizeof(_T); }
   size_type capacity() const {
-    return size_type(const_iterator(__end_cap_alloc_type_ - begin()));
+    return size_type(const_iterator(__end_cap_pointer_ - begin()));
   }
   bool empty() const { return begin() == end(); }
   void reserve(size_type n);
@@ -187,7 +216,7 @@ class vector : private __vector_base<_T, _Allocator> {
   iterator erase(const_iterator position);
   iterator erase(const_iterator first, const_iterator last);
   void     swap(vector &x);
-  void     clear() throw();
+  void     clear() throw() {}
 
   allocator_type get_allocator() const { return _base::__alloc(); }
 };
