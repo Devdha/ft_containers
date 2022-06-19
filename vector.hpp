@@ -85,6 +85,10 @@ __vector_base<_T, _Allocator>::~__vector_base() {
   }
 }
 
+/* ####################################################
+#########               vector             ############
+#################################################### */
+
 template <class _T, class _Allocator>
 class vector : private __vector_base<_T, _Allocator> {
  private:
