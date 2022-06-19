@@ -36,6 +36,7 @@ class __vector_base {
 
   __vector_base() _NOEXCEPT;
   __vector_base(const allocator_type &__a);
+  __vector_base(size_t __n, const allocator_type &__a);
   ~__vector_base();
 
   allocator_type       &__alloc() _NOEXCEPT { return __end_cap_alloc_type_; }
@@ -67,6 +68,15 @@ __vector_base<_T, _Allocator>::__vector_base(const allocator_type &__a)
       __end_cap_pointer_(nullptr),
       __end_cap_alloc_type_(__a) {}
 
+template <typename _T, typename _Allocator>
+__vector_base<_T, _Allocator>::__vector_base(size_t                __n,
+                                             const allocator_type &__a) {
+  __begin_ = __alloc_traits::allocator(__n);
+  __end_ = __begin_;
+  __end_cap_pointer_ = __begin_ + __n;
+  __end_cap_alloc_type_ = __a;
+}
+
 template <class _T, class _Allocator>
 __vector_base<_T, _Allocator>::~__vector_base() {
   if (__begin_ != nullptr) {
@@ -88,18 +98,18 @@ class vector : private __vector_base<_T, _Allocator> {
   using _base::__end_cap_pointer_;
 
  public:
-  typedef _T                                            value_type;
-  typedef value_type                                   *pointer;
-  typedef const value_type                             *const_pointer;
-  typedef __normal_iterator<pointer, vector_type>       iterator;
-  typedef __normal_iterator<const_pointer, vector_type> const_iterator;
-  typedef value_type                                   &reference;
-  typedef const value_type                             &const_reference;
-  typedef size_t                                        size_type;
-  typedef ptrdiff_t                                     difference_type;
-  typedef typename _base::allocator_type                allocator_type;
-  typedef reverse_iterator<const_iterator>              const_reverse_iterator;
-  typedef reverse_iterator<iterator>                    reverse_iterator;
+  typedef _T                               value_type;
+  typedef value_type                      *pointer;
+  typedef const value_type                *const_pointer;
+  typedef _T                              *iterator;
+  typedef const _T                        *const_iterator;
+  typedef value_type                      &reference;
+  typedef const value_type                &const_reference;
+  typedef size_t                           size_type;
+  typedef ptrdiff_t                        difference_type;
+  typedef typename _base::allocator_type   allocator_type;
+  typedef reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef reverse_iterator<iterator>       reverse_iterator;
 
  private:
   iterator       __make_iter(pointer __p) { return iterator(__p); }
@@ -118,7 +128,7 @@ class vector : private __vector_base<_T, _Allocator> {
          const allocator_type &alloc = allocator_type());
   vector(const vector &x);
 
-  ~vector();
+  ~vector() {}
 
   vector &operator=(const vector &x);
 
