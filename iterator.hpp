@@ -166,6 +166,122 @@ reverse_iterator<Iter> operator+(
   return reverse_iterator<Iter>(__rev_it.base() - __n);
 }
 
+template <typename _Iterator, typename _Container>
+class __normal_iterator
+    : public iterator<typename iterator_traits<_Iter>::iterator_category,
+                      typename iterator_traits<_Iter>::value_type,
+                      typename iterator_traits<_Iter>::difference_type,
+                      typename iterator_traits<_Iter>::pointer,
+                      typename iterator_traits<_Iter>::reference> {
+ protected:
+  _Iterator _current;
+
+ public:
+  typedef typename iterator_traits<_Iterator>::difference_type difference_type;
+  typedef typename iterator_traits<_Iterator>::reference       reference;
+  typedef typename iterator_traits<_Iterator>::pointer         pointer;
+
+  __normal_iterator() : _current(_Iterator()) {}
+
+  explicit __normal_iterator(const _Iterator& __i) : current(__i) {}
+
+  template <typename _Iter>
+  __normal_iterator(const __normal_iterator<_Iter, _Container>& __i)
+      : _current(__i.base()) {}
+
+  reference operator*() const { return *_current; }
+
+  pointer operator->() const { return _current; }
+
+  __normal_iterator& operator++() {
+    ++_current;
+    return *this;
+  }
+
+  __normal_iterator operator++(int) { return __normal_iterator(_current++); }
+
+  // Bidirectional iterator requirements
+  __normal_iterator& operator--() {
+    --_current;
+    return *this;
+  }
+
+  __normal_iterator operator--(int) { return __normal_iterator(_current--); }
+
+  // Random access iterator requirements
+  reference operator[](const difference_type& __n) const {
+    return _current[__n];
+  }
+
+  __normal_iterator& operator+=(const difference_type& __n) {
+    _current += __n;
+    return *this;
+  }
+
+  __normal_iterator operator+(const difference_type& __n) const {
+    return __normal_iterator(_current + __n);
+  }
+
+  __normal_iterator& operator-=(const difference_type& __n) {
+    _current -= __n;
+    return *this;
+  }
+
+  __normal_iterator operator-(const difference_type& __n) const {
+    return __normal_iterator(_current - __n);
+  }
+
+  difference_type operator-(const __normal_iterator& __i) const {
+    return _current - __i._current;
+  }
+
+  const _Iterator& base() const { return _current; }
+};
+
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator==(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                       const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return __lhs.base() == __rhs.base();
+}
+
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator!=(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                       const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return !(__lhs == __rhs);
+}
+
+// Random access iterator requirements
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator<(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                      const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return __lhs.base() < __rhs.base();
+}
+
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator>(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                      const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return __rhs < __lhs;
+}
+
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator<=(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                       const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return !(__rhs < __lhs);
+}
+
+template <typename _IteratorL, typename _IteratorR, typename _Container>
+inline bool operator>=(const __normal_iterator<_IteratorL, _Container>& __lhs,
+                       const __normal_iterator<_IteratorR, _Container>& __rhs) {
+  return !(__lhs < __rhs);
+}
+
+template <typename _Iterator, typename _Container>
+inline __normal_iterator<_Iterator, _Container> operator+(
+    typename __normal_iterator<_Iterator, _Container>::difference_type __n,
+    const __normal_iterator<_Iterator, _Container>&                    __i) {
+  return __normal_iterator<_Iterator, _Container>(__i.base() + __n);
+}
+
 }  // namespace ft
 
 #endif  // ITERATOR_HPP

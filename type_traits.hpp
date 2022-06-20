@@ -169,7 +169,7 @@ struct __type_traits<_T*> {
   typedef __true_type is_POD_type;
 };
 
-template <class _Tp>
+template <class _T>
 struct _Is_integer {
   typedef __false_type _Integral;
 };
@@ -239,9 +239,17 @@ struct _Is_integer<unsigned long long> {
   typedef __true_type _Integral;
 };
 
-template <typename _Tp>
+template <typename _T>
 struct _Is_normal_iterator {
   typedef __false_type _Normal;
+};
+
+template <typename _Iterator, typename _Container>
+class __normal_iterator;
+
+template <typename _Iterator, typename _Container>
+struct _Is_normal_iterator<ft::__normal_iterator<_Iterator, _Container> > {
+  typedef __true_type _Normal;
 };
 
 }  // namespace ft
