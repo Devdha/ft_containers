@@ -168,11 +168,11 @@ reverse_iterator<Iter> operator+(
 
 template <typename _Iterator, typename _Container>
 class __normal_iterator
-    : public iterator<typename iterator_traits<_Iter>::iterator_category,
-                      typename iterator_traits<_Iter>::value_type,
-                      typename iterator_traits<_Iter>::difference_type,
-                      typename iterator_traits<_Iter>::pointer,
-                      typename iterator_traits<_Iter>::reference> {
+    : public iterator<typename iterator_traits<_Iterator>::iterator_category,
+                      typename iterator_traits<_Iterator>::value_type,
+                      typename iterator_traits<_Iterator>::difference_type,
+                      typename iterator_traits<_Iterator>::pointer,
+                      typename iterator_traits<_Iterator>::reference> {
  protected:
   _Iterator _current;
 
@@ -183,7 +183,7 @@ class __normal_iterator
 
   __normal_iterator() : _current(_Iterator()) {}
 
-  explicit __normal_iterator(const _Iterator& __i) : current(__i) {}
+  explicit __normal_iterator(const _Iterator& __i) : _current(__i) {}
 
   template <typename _Iter>
   __normal_iterator(const __normal_iterator<_Iter, _Container>& __i)

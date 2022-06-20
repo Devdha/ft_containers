@@ -102,18 +102,18 @@ class vector : private __vector_base<_T, _Allocator> {
   using _base::__end_cap_pointer_;
 
  public:
-  typedef _T                               value_type;
-  typedef value_type                      *pointer;
-  typedef const value_type                *const_pointer;
-  typedef _T                              *iterator;
-  typedef const _T                        *const_iterator;
-  typedef value_type                      &reference;
-  typedef const value_type                &const_reference;
-  typedef size_t                           size_type;
-  typedef ptrdiff_t                        difference_type;
-  typedef typename _base::allocator_type   allocator_type;
-  typedef reverse_iterator<const_iterator> const_reverse_iterator;
-  typedef reverse_iterator<iterator>       reverse_iterator;
+  typedef _T                                             value_type;
+  typedef value_type                                    *pointer;
+  typedef const value_type                              *const_pointer;
+  typedef __normal_iterator<pointer, vector_type>        iterator;
+  typedef __normal_iterator<const_pointer, vector_type> *const_iterator;
+  typedef value_type                                    &reference;
+  typedef const value_type                              &const_reference;
+  typedef size_t                                         size_type;
+  typedef ptrdiff_t                                      difference_type;
+  typedef typename _base::allocator_type                 allocator_type;
+  typedef reverse_iterator<const_iterator>               const_reverse_iterator;
+  typedef reverse_iterator<iterator>                     reverse_iterator;
 
  private:
   iterator       __make_iter(pointer __p) { return iterator(__p); }
@@ -183,7 +183,7 @@ class vector : private __vector_base<_T, _Allocator> {
   void      resize(size_type n, value_type val = value_type());
   size_type max_size() const { return size_type(-1) / sizeof(_T); }
   size_type capacity() const {
-    return size_type(const_iterator(__end_cap_pointer_ - begin()));
+    return size_type(const_iterator(__end_cap_pointer_ - __begin_));
   }
   bool empty() const { return begin() == end(); }
   void reserve(size_type n);
