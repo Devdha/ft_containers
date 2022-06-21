@@ -120,12 +120,17 @@ class vector : private __vector_base<_T, _Allocator> {
   typedef reverse_iterator<iterator>                     reverse_iterator;
 
  private:
-  void _insert_aux(iterator __position, const _T &__val);
   // ================================================================
   // make iter functions
   iterator       __make_iter(pointer __p) { return iterator(__p); }
   const_iterator __make_iter(const_pointer __p) const {
     return const_iterator(__p);
+  }
+
+  // allocate functions
+  _T  *_allocate(size_t __n) { return allocator_type::allocate(__n); }
+  void _deallocate(_T *__p, size_t __n) {
+    allocator_type::deallocate(__p, __n);
   }
 
   // ================================================================
@@ -164,6 +169,11 @@ class vector : private __vector_base<_T, _Allocator> {
   void _assign_dispatch(_Integer __n, _Integer __val, __true_type);
   template <class _InputIter>
   void _assign_dispatch(_InputIter __first, _InputIter __last, __false_type);
+
+  // ================================================================
+  // insert_aux functions
+  void _insert_aux(iterator __position, const _T &__val);
+  void _insert_aux(iterator __position);
 
   // ================================================================
  public:
@@ -298,7 +308,7 @@ class vector : private __vector_base<_T, _Allocator> {
 };
 
 // ================================================================
-// Private functions implement
+// vector: Private functions implement
 
 template <class _T, class _Allocator>
 void vector<_T, _Allocator>::__range_check(size_type __n) const {
@@ -319,6 +329,8 @@ void vector<_T, _Allocator>::_Destroy(_ForwardIterator __first,
       _Has_trivial_destructor;
   __destory_aux(__first, __last, _Has_trivial_destructor());
 }
+
+// ================================================================
 
 template <class _T, class _Allocator>
 void vector<_T, _Allocator>::_fill_assign(size_t __n, const value_type &__val) {
@@ -409,6 +421,58 @@ void vector<_T, _Allocator>::_insert_aux(iterator __position, const _T &__val) {
     _Construct(__end_, *(__end_ - 1));
     ++__end_;
     _T __val_copy = __val;
+    __copy_backward(__position, iterator(__end_ - 2), iterator(__end_ - 1));
+    *__position = __val_copy;
+  } else {
+    const size_type __old_size = size();
+    const size_type __len = __old_size != 0 ? 2 * __old_size : 1;
+    iterator        __new_start = _allocate(__len);
+    iterator        __new_finish(__new_start);
+    try {
+      __new_finish = std::uninitialized_copy(begin(), __position, __new_start);
+      _Construct(__new_finish.base(), __val);
+      ++__new_finish;
+      __new_finish = std::uninitialized_copy(__position, end(), __new_finish);
+    } catch (...) {
+      _Destroy(__new_start, __new_finish);
+      _deallocate(__new_start.base(), __len);
+      throw;
+    }
+    _Destroy(begin(), end());
+    _deallocate(__begin_, __end_cap_pointer_ - __begin_);
+    __begin_ = __new_start.base();
+    __end_ = __new_finish.base();
+    __end_cap_pointer_ = __new_start.base() + len();
+  }
+}
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::_insert_aux(iterator __position) {
+  if (__end_ != __end_cap_pointer_) {
+    _Construct(__end_, *(__end_ - 1));
+    ++__end_;
+    __copy_backward(__position, iterator(__end_ - 2), iterator(__end_ - 1));
+    *__position = _T();
+  } else {
+    const size_type __old_size = size();
+    const size_type __len = __old_size != 0 ? 2 * __old_size : 1;
+    iterator        __new_start = _allocate(__len);
+    iterator        __new_finish(__new_start);
+    try {
+      __new_finish = std::uninitialized_copy(begin(), __position, __new_start);
+      _Construct(__new_finish);
+      ++__new_finish;
+      __new_finish = std::uninitialized_copy(__position, end(), __new_finish);
+    } catch (...) {
+      _Destroy(__new_start, __new_finish);
+      _deallocate(__new_start.base(), __len);
+      throw;
+    }
+    _Destroy(begin(), end());
+    _deallocate(__begin_, __end_cap_pointer_ - __begin_);
+    __begin_ = __new_start.base();
+    __end_ = __new_finish.base();
+    __end_cap_pointer_ = __new_start.base() + len();
   }
 }
 
