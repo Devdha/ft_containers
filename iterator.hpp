@@ -282,6 +282,17 @@ inline __normal_iterator<_Iterator, _Container> operator+(
   return __normal_iterator<_Iterator, _Container>(__i.base() + __n);
 }
 
+template <typename _T>
+_T* __copy_trivial(const _T* __first, const _T* __last, _T* __result) {
+  memmove(__result, __first, sizeof(_T) * (__last - __first));
+  return __result + (__last - __first);
+}
+
+template <typename _InputIterator, typename _Distance>
+void advance(_InputIterator& __i, _Distance __n) {
+  while (__n--) ++__i;
+}
+
 }  // namespace ft
 
 #endif  // ITERATOR_HPP

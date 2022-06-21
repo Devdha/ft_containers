@@ -179,10 +179,30 @@ class vector : private __vector_base<_T, _Allocator> {
       insert(end(), __first, __last);
   }
 
-  template <class _ForwardIter>
-  void _assign_aux(_ForwardIter __first, _ForwardIter __last,
+  template <class _ForwardIterator>
+  void __destroy_aux(_ForwardIterator __first, _ForwardIterator __last,
+                     __false_type) {
+    for (; __first != __last; ++__first) _Destroy(&*__first);
+  }
+
+  template <class _ForwardIterator>
+  void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type) {}
+
+  void _Destroy(pointer *__pointer) { __pointer->~_T(); }
+
+  template <class _ForwardIterator>
+  void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
+    typedef typename iterator_traits<_ForwardIterator>::value_type _Value_type;
+    typedef typename __type_traits<_Value_type>::has_trivial_destructor
+        _Has_trivial_destructor;
+    __destory_aux(__first, __last, _Has_trivial_destructor());
+  }
+
+  template <class _ForwardIterator>
+  void _assign_aux(_ForwardIterator __first, _ForwardIterator __last,
                    forward_iterator_tag) {
     size_type __len = __distance(__first, __last);
+
     if (__len > capacity()) {
       pointer __tmp = allocator_type::allocate(__len);
       try {
@@ -190,12 +210,19 @@ class vector : private __vector_base<_T, _Allocator> {
       } catch (...) {
         allocator_type::deallocate(__tmp, __len);
       }
-      // std::_Destroy(__begin_, __end_);
+      _Destroy(__begin_, __end_);
       allocator_type::deallocate(__begin_, __end_cap_pointer_ - __begin_);
       __begin_ = __tmp;
       __end_cap_pointer_ = __end_ = __begin_ + __len;
     } else if (size() >= __len) {
+      iterator __new_end(ft::__copy_trivial(__first, __last, __begin_));
+      _Destroy(__new_end, end());
+      __end_ = __new_end.base();
     } else {
+      _ForwardIterator __mid = __first;
+      ft::advance(__mid, size());
+      __copy_trivial(__first, __mid, __begin_);
+      __end_ = std::uninitialized_copy(__mid, __last, __end_);
     }
   }
 
