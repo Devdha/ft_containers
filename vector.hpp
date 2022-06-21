@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include "algorithm.hpp"
 #include "iterator.hpp"
 #include "type_traits.hpp"
 
@@ -119,6 +120,7 @@ class vector : private __vector_base<_T, _Allocator> {
   typedef reverse_iterator<iterator>                     reverse_iterator;
 
  private:
+  void _insert_aux(iterator __position, const _T &__val);
   // ================================================================
   // make iter functions
   iterator       __make_iter(pointer __p) { return iterator(__p); }
@@ -128,9 +130,7 @@ class vector : private __vector_base<_T, _Allocator> {
 
   // ================================================================
   // range check function
-  void __range_check(size_type __n) const {
-    if (__n >= this->size()) std::__throw_out_of_range("vector");
-  }
+  void __range_check(size_type __n) const;
 
   template <typename _InputIterator>
   typename iterator_traits<_InputIterator>::difference_type __distance(
@@ -145,86 +145,25 @@ class vector : private __vector_base<_T, _Allocator> {
 
   // ================================================================
   // assign_aux functions
-  void _fill_assign(size_t __n, const value_type &__val) {
-    if (__n > capacity()) {
-      vector<_T, _Allocator> __tmp(__n, __val, get_allocator());
-      __tmp.swap(*this);
-    } else if (__n > size()) {
-      fill(begin(), end(), __val);
-      __end_ = uninitialized_fill_n(__end_, __n - size(), __val);
-    } else
-      erase(fill_n(begin(), __n, __val), end());
-  }
-
-  template <class _Integer>
-  void _assign_dispatch(_Integer __n, _Integer __val, __true_type) {
-    _fill_assign((size_type)__n, (_T)__val);
-  }
-
-  template <class _InputIter>
-  void _assign_dispatch(_InputIter __first, _InputIter __last, __false_type) {
-    typedef
-        typename iterator_traits<_InputIter>::iterator_category _IterCategory;
-    _assign_aux(__first, __last, _IterCategory());
-  }
-
-  template <class _InputIter>
-  void _assign_aux(_InputIter __first, _InputIter __last, input_iterator_tag) {
-    iterator __cur(begin());
-    for (; __first != __last && __cur != end(); ++__cur, ++__first)
-      *__cur = *__first;
-    if (__first == __last)
-      erase(__cur, end());
-    else
-      insert(end(), __first, __last);
-  }
-
   template <class _ForwardIterator>
   void __destroy_aux(_ForwardIterator __first, _ForwardIterator __last,
-                     __false_type) {
-    for (; __first != __last; ++__first) _Destroy(&*__first);
-  }
-
+                     __false_type);
   template <class _ForwardIterator>
-  void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type) {}
-
-  void _Destroy(pointer *__pointer) { __pointer->~_T(); }
-
+  void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type);
+  void _Destroy(pointer *__pointer);
   template <class _ForwardIterator>
-  void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
-    typedef typename iterator_traits<_ForwardIterator>::value_type _Value_type;
-    typedef typename __type_traits<_Value_type>::has_trivial_destructor
-        _Has_trivial_destructor;
-    __destory_aux(__first, __last, _Has_trivial_destructor());
-  }
+  void _Destroy(_ForwardIterator __first, _ForwardIterator __last);
 
+  void _fill_assign(size_t __n, const value_type &__val);
+  template <class _InputIter>
+  void _assign_aux(_InputIter __first, _InputIter __last, input_iterator_tag);
   template <class _ForwardIterator>
   void _assign_aux(_ForwardIterator __first, _ForwardIterator __last,
-                   forward_iterator_tag) {
-    size_type __len = __distance(__first, __last);
-
-    if (__len > capacity()) {
-      pointer __tmp = allocator_type::allocate(__len);
-      try {
-        std::uninitialized_copy(__first, __last, __tmp);
-      } catch (...) {
-        allocator_type::deallocate(__tmp, __len);
-      }
-      _Destroy(__begin_, __end_);
-      allocator_type::deallocate(__begin_, __end_cap_pointer_ - __begin_);
-      __begin_ = __tmp;
-      __end_cap_pointer_ = __end_ = __begin_ + __len;
-    } else if (size() >= __len) {
-      iterator __new_end(ft::__copy_trivial(__first, __last, __begin_));
-      _Destroy(__new_end, end());
-      __end_ = __new_end.base();
-    } else {
-      _ForwardIterator __mid = __first;
-      ft::advance(__mid, size());
-      __copy_trivial(__first, __mid, __begin_);
-      __end_ = std::uninitialized_copy(__mid, __last, __end_);
-    }
-  }
+                   forward_iterator_tag);
+  template <class _Integer>
+  void _assign_dispatch(_Integer __n, _Integer __val, __true_type);
+  template <class _InputIter>
+  void _assign_dispatch(_InputIter __first, _InputIter __last, __false_type);
 
   // ================================================================
  public:
@@ -320,25 +259,158 @@ class vector : private __vector_base<_T, _Allocator> {
     typedef typename _Is_integer<_InputIterator>::_Integral _Integral;
     _assign_dispatch(__first, __last, _Integral());
   }
+
   void assign(size_type __n, const value_type &__val) {
     _fill_assign(__n, __val);
   }
+
   void push_back(const value_type &val);
   template <class InputIterator>
-  void     insert(iterator position, InputIterator first, InputIterator last);
-  iterator insert(iterator position, const value_type &val);
-  void     insert(iterator position, size_type n, const value_type &val);
-  iterator erase(const_iterator position);
-  iterator erase(const_iterator first, const_iterator last);
-  void     swap(vector &__x) {
-        std::swap(__begin_, __x.__begin_);
-        std::swap(__end_, __x.__end_);
-        std::swap(__end_cap_pointer_, __x.__end_cap_pointer_);
+  void insert(iterator __position, InputIterator __first,
+              InputIterator __last) {}
+
+  iterator insert(iterator __position, const value_type &__val) {
+    size_type __n = __position - begin();  // 벡터 내 몇 번째 위치인지
+    // end가 할당 끝이 아니고, 포지션이 엔드일 때
+    if (__end_ != __end_cap_pointer_ && __position == end()) {
+      _Construct(__end_, __val);
+      ++__end_;
+    } else
+      _insert_aux(iterator(__position), __x);
+    return begin() + __n;
   }
+
+  void insert(iterator __position, size_type __n, const value_type &__val) {}
+
+  iterator erase(const_iterator __position) {}
+
+  iterator erase(const_iterator __first, const_iterator __last) {}
+
+  void swap(vector &__x) {
+    std::swap(__begin_, __x.__begin_);
+    std::swap(__end_, __x.__end_);
+    std::swap(__end_cap_pointer_, __x.__end_cap_pointer_);
+  }
+
   void clear() throw() {}
 
   allocator_type get_allocator() const { return _base::__alloc(); }
 };
+
+// ================================================================
+// Private functions implement
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::__range_check(size_type __n) const {
+  if (__n >= this->size()) std::__throw_out_of_range("vector");
+}
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::_Destroy(pointer *__pointer) {
+  __pointer->~_T();
+}
+
+template <class _T, class _Allocator>
+template <class _ForwardIterator>
+void vector<_T, _Allocator>::_Destroy(_ForwardIterator __first,
+                                      _ForwardIterator __last) {
+  typedef typename iterator_traits<_ForwardIterator>::value_type _Value_type;
+  typedef typename __type_traits<_Value_type>::has_trivial_destructor
+      _Has_trivial_destructor;
+  __destory_aux(__first, __last, _Has_trivial_destructor());
+}
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::_fill_assign(size_t __n, const value_type &__val) {
+  if (__n > capacity()) {
+    vector<_T, _Allocator> __tmp(__n, __val, get_allocator());
+    __tmp.swap(*this);
+  } else if (__n > size()) {
+    fill(begin(), end(), __val);
+    __end_ = uninitialized_fill_n(__end_, __n - size(), __val);
+  } else
+    erase(fill_n(begin(), __n, __val), end());
+}
+
+template <class _T, class _Allocator>
+template <class _InputIter>
+void vector<_T, _Allocator>::_assign_aux(_InputIter __first, _InputIter __last,
+                                         input_iterator_tag) {
+  iterator __cur(begin());
+  for (; __first != __last && __cur != end(); ++__cur, ++__first)
+    *__cur = *__first;
+  if (__first == __last)
+    erase(__cur, end());
+  else
+    insert(end(), __first, __last);
+}
+
+template <class _T, class _Allocator>
+template <class _ForwardIterator>
+void vector<_T, _Allocator>::_assign_aux(_ForwardIterator __first,
+                                         _ForwardIterator __last,
+                                         forward_iterator_tag) {
+  size_type __len = __distance(__first, __last);
+
+  if (__len > capacity()) {
+    pointer __tmp = allocator_type::allocate(__len);
+    try {
+      std::uninitialized_copy(__first, __last, __tmp);
+    } catch (...) {
+      allocator_type::deallocate(__tmp, __len);
+    }
+    _Destroy(__begin_, __end_);
+    allocator_type::deallocate(__begin_, __end_cap_pointer_ - __begin_);
+    __begin_ = __tmp;
+    __end_cap_pointer_ = __end_ = __begin_ + __len;
+  } else if (size() >= __len) {
+    iterator __new_end(ft::__copy_trivial(__first, __last, __begin_));
+    _Destroy(__new_end, end());
+    __end_ = __new_end.base();
+  } else {
+    _ForwardIterator __mid = __first;
+    ft::advance(__mid, size());
+    __copy_trivial(__first, __mid, __begin_);
+    __end_ = std::uninitialized_copy(__mid, __last, __end_);
+  }
+}
+
+template <class _T, class _Allocator>
+template <class _Integer>
+void vector<_T, _Allocator>::_assign_dispatch(_Integer __n, _Integer __val,
+                                              __true_type) {
+  _fill_assign((size_type)__n, (_T)__val);
+}
+
+template <class _T, class _Allocator>
+template <class _InputIter>
+void vector<_T, _Allocator>::_assign_dispatch(_InputIter __first,
+                                              _InputIter __last, __false_type) {
+  typedef typename iterator_traits<_InputIter>::iterator_category _IterCategory;
+  _assign_aux(__first, __last, _IterCategory());
+}
+
+template <class _T, class _Allocator>
+template <class _ForwardIterator>
+void vector<_T, _Allocator>::__destroy_aux(_ForwardIterator __first,
+                                           _ForwardIterator __last,
+                                           __false_type) {
+  for (; __first != __last; ++__first) _Destroy(&*__first);
+}
+
+template <class _T, class _Allocator>
+template <class _ForwardIterator>
+void vector<_T, _Allocator>::__destroy_aux(_ForwardIterator, _ForwardIterator,
+                                           __true_type) {}
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::_insert_aux(iterator __position, const _T &__val) {
+  if (__end_ != __end_cap_pointer_) {
+    _Construct(__end_, *(__end_ - 1));
+    ++__end_;
+    _T __val_copy = __val;
+  }
+}
 
 }  // namespace ft
 
