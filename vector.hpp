@@ -167,15 +167,15 @@ class vector : private __vector_base<_T, _Allocator> {
   void __insert_aux(iterator __position);
 
   template <class _Integer>
-  void _insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
-                        __true_type) {
-    _fill_insert(__pos, static_cast<size_type>(__n), static_cast<_T>(__val));
+  void __insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
+                         __true_type) {
+    __fill_insert(__pos, static_cast<size_type>(__n), static_cast<_T>(__val));
   }
 
   template <class _InputIterator>
-  void _insert_dispatch(iterator __pos, _InputIterator __first,
-                        _InputIterator __last, __false_type) {
-    _range_insert(__pos, __first, __last);
+  void __insert_dispatch(iterator __pos, _InputIterator __first,
+                         _InputIterator __last, __false_type) {
+    __range_insert(__pos, __first, __last);
   }
 
   void __fill_insert(iterator __pos, size_type __n, const _T &__val);
@@ -287,7 +287,7 @@ class vector : private __vector_base<_T, _Allocator> {
   void insert(iterator __position, InputIterator __first,
               InputIterator __last) {
     typedef typename _Is_integer<InputIterator>::_Integral _Integral;
-    _insert_dispatch(__position, __first, __last, _Integral());
+    __insert_dispatch(__position, __first, __last, _Integral());
   }
 
   iterator insert(iterator __position, const value_type &__val) {
