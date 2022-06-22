@@ -150,30 +150,39 @@ class vector : private __vector_base<_T, _Allocator> {
 
   // ================================================================
   // assign_aux functions
-  template <class _ForwardIterator>
-  void __destroy_aux(_ForwardIterator __first, _ForwardIterator __last,
-                     __false_type);
-  template <class _ForwardIterator>
-  void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type);
-  void _Destroy(pointer *__pointer);
-  template <class _ForwardIterator>
-  void _Destroy(_ForwardIterator __first, _ForwardIterator __last);
-
-  void _fill_assign(size_t __n, const value_type &__val);
+  void __fill_assign(size_t __n, const value_type &__val);
   template <class _InputIter>
-  void _assign_aux(_InputIter __first, _InputIter __last, input_iterator_tag);
+  void __assign_aux(_InputIter __first, _InputIter __last, input_iterator_tag);
   template <class _ForwardIterator>
-  void _assign_aux(_ForwardIterator __first, _ForwardIterator __last,
-                   forward_iterator_tag);
+  void __assign_aux(_ForwardIterator __first, _ForwardIterator __last,
+                    forward_iterator_tag);
   template <class _Integer>
-  void _assign_dispatch(_Integer __n, _Integer __val, __true_type);
+  void __assign_dispatch(_Integer __n, _Integer __val, __true_type);
   template <class _InputIter>
-  void _assign_dispatch(_InputIter __first, _InputIter __last, __false_type);
+  void __assign_dispatch(_InputIter __first, _InputIter __last, __false_type);
 
   // ================================================================
   // insert_aux functions
-  void _insert_aux(iterator __position, const _T &__val);
-  void _insert_aux(iterator __position);
+  void __insert_aux(iterator __position, const _T &__val);
+  void __insert_aux(iterator __position);
+
+  template <class _Integer>
+  void _insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
+                        __true_type) {
+    _fill_insert(__pos, static_cast<size_type>(__n), static_cast<_T>(__val));
+  }
+
+  template <class _InputIterator>
+  void _insert_dispatch(iterator __pos, _InputIterator __first,
+                        _InputIterator __last, __false_type) {
+    _range_insert(__pos, __first, __last);
+  }
+
+  void __fill_insert(iterator __pos, size_type __n, const _T &__val);
+
+  template <class _InputIterator>
+  void __range_insert(iterator __pos, _InputIterator __first,
+                      _InputIterator __last);
 
   // ================================================================
  public:
@@ -267,17 +276,19 @@ class vector : private __vector_base<_T, _Allocator> {
   template <class _InputIterator>
   void assign(_InputIterator __first, _InputIterator __last) {
     typedef typename _Is_integer<_InputIterator>::_Integral _Integral;
-    _assign_dispatch(__first, __last, _Integral());
+    __assign_dispatch(__first, __last, _Integral());
   }
 
-  void assign(size_type __n, const value_type &__val) {
-    _fill_assign(__n, __val);
-  }
+  void assign(size_type __n, const value_type &__val) { _(__n, __val); }
 
   void push_back(const value_type &val);
+
   template <class InputIterator>
   void insert(iterator __position, InputIterator __first,
-              InputIterator __last) {}
+              InputIterator __last) {
+    typedef typename _Is_integer<InputIterator>::_Integral _Integral;
+    _insert_dispatch(__position, __first, __last, _Integral());
+  }
 
   iterator insert(iterator __position, const value_type &__val) {
     size_type __n = __position - begin();  // 벡터 내 몇 번째 위치인지
@@ -286,15 +297,17 @@ class vector : private __vector_base<_T, _Allocator> {
       _Construct(__end_, __val);
       ++__end_;
     } else
-      _insert_aux(iterator(__position), __x);
+      __insert_aux(iterator(__position), __val);
     return begin() + __n;
   }
 
-  void insert(iterator __position, size_type __n, const value_type &__val) {}
+  void insert(iterator __position, size_type __n, const value_type &__val) {
+    __fill_insert(__position, __n, __val);
+  }
 
-  iterator erase(const_iterator __position) {}
+  // iterator erase(const_iterator __position) {}
 
-  iterator erase(const_iterator __first, const_iterator __last) {}
+  // iterator erase(const_iterator __first, const_iterator __last) {}
 
   void swap(vector &__x) {
     std::swap(__begin_, __x.__begin_);
@@ -315,25 +328,11 @@ void vector<_T, _Allocator>::__range_check(size_type __n) const {
   if (__n >= this->size()) std::__throw_out_of_range("vector");
 }
 
-template <class _T, class _Allocator>
-void vector<_T, _Allocator>::_Destroy(pointer *__pointer) {
-  __pointer->~_T();
-}
-
-template <class _T, class _Allocator>
-template <class _ForwardIterator>
-void vector<_T, _Allocator>::_Destroy(_ForwardIterator __first,
-                                      _ForwardIterator __last) {
-  typedef typename iterator_traits<_ForwardIterator>::value_type _Value_type;
-  typedef typename __type_traits<_Value_type>::has_trivial_destructor
-      _Has_trivial_destructor;
-  __destory_aux(__first, __last, _Has_trivial_destructor());
-}
-
 // ================================================================
 
 template <class _T, class _Allocator>
-void vector<_T, _Allocator>::_fill_assign(size_t __n, const value_type &__val) {
+void vector<_T, _Allocator>::__fill_assign(size_t            __n,
+                                           const value_type &__val) {
   if (__n > capacity()) {
     vector<_T, _Allocator> __tmp(__n, __val, get_allocator());
     __tmp.swap(*this);
@@ -346,8 +345,8 @@ void vector<_T, _Allocator>::_fill_assign(size_t __n, const value_type &__val) {
 
 template <class _T, class _Allocator>
 template <class _InputIter>
-void vector<_T, _Allocator>::_assign_aux(_InputIter __first, _InputIter __last,
-                                         input_iterator_tag) {
+void vector<_T, _Allocator>::__assign_aux(_InputIter __first, _InputIter __last,
+                                          input_iterator_tag) {
   iterator __cur(begin());
   for (; __first != __last && __cur != end(); ++__cur, ++__first)
     *__cur = *__first;
@@ -359,9 +358,9 @@ void vector<_T, _Allocator>::_assign_aux(_InputIter __first, _InputIter __last,
 
 template <class _T, class _Allocator>
 template <class _ForwardIterator>
-void vector<_T, _Allocator>::_assign_aux(_ForwardIterator __first,
-                                         _ForwardIterator __last,
-                                         forward_iterator_tag) {
+void vector<_T, _Allocator>::__assign_aux(_ForwardIterator __first,
+                                          _ForwardIterator __last,
+                                          forward_iterator_tag) {
   size_type __len = __distance(__first, __last);
 
   if (__len > capacity()) {
@@ -389,34 +388,23 @@ void vector<_T, _Allocator>::_assign_aux(_ForwardIterator __first,
 
 template <class _T, class _Allocator>
 template <class _Integer>
-void vector<_T, _Allocator>::_assign_dispatch(_Integer __n, _Integer __val,
-                                              __true_type) {
-  _fill_assign((size_type)__n, (_T)__val);
+void vector<_T, _Allocator>::__assign_dispatch(_Integer __n, _Integer __val,
+                                               __true_type) {
+  _((size_type)__n, (_T)__val);
 }
 
 template <class _T, class _Allocator>
 template <class _InputIter>
-void vector<_T, _Allocator>::_assign_dispatch(_InputIter __first,
-                                              _InputIter __last, __false_type) {
+void vector<_T, _Allocator>::__assign_dispatch(_InputIter __first,
+                                               _InputIter __last,
+                                               __false_type) {
   typedef typename iterator_traits<_InputIter>::iterator_category _IterCategory;
-  _assign_aux(__first, __last, _IterCategory());
+  __assign_aux(__first, __last, _IterCategory());
 }
 
 template <class _T, class _Allocator>
-template <class _ForwardIterator>
-void vector<_T, _Allocator>::__destroy_aux(_ForwardIterator __first,
-                                           _ForwardIterator __last,
-                                           __false_type) {
-  for (; __first != __last; ++__first) _Destroy(&*__first);
-}
-
-template <class _T, class _Allocator>
-template <class _ForwardIterator>
-void vector<_T, _Allocator>::__destroy_aux(_ForwardIterator, _ForwardIterator,
-                                           __true_type) {}
-
-template <class _T, class _Allocator>
-void vector<_T, _Allocator>::_insert_aux(iterator __position, const _T &__val) {
+void vector<_T, _Allocator>::__insert_aux(iterator  __position,
+                                          const _T &__val) {
   if (__end_ != __end_cap_pointer_) {
     _Construct(__end_, *(__end_ - 1));
     ++__end_;
@@ -442,12 +430,12 @@ void vector<_T, _Allocator>::_insert_aux(iterator __position, const _T &__val) {
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
     __begin_ = __new_start.base();
     __end_ = __new_finish.base();
-    __end_cap_pointer_ = __new_start.base() + len();
+    __end_cap_pointer_ = __new_start.base() + __len;
   }
 }
 
 template <class _T, class _Allocator>
-void vector<_T, _Allocator>::_insert_aux(iterator __position) {
+void vector<_T, _Allocator>::__insert_aux(iterator __position) {
   if (__end_ != __end_cap_pointer_) {
     _Construct(__end_, *(__end_ - 1));
     ++__end_;
@@ -472,7 +460,64 @@ void vector<_T, _Allocator>::_insert_aux(iterator __position) {
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
     __begin_ = __new_start.base();
     __end_ = __new_finish.base();
-    __end_cap_pointer_ = __new_start.base() + len();
+    __end_cap_pointer_ = __new_start.base() + __len;
+  }
+}
+
+template <class _T, class _Allocator>
+void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
+                                           const _T &__val) {
+  if (__n != 0) {
+    if (size_type(__end_cap_pointer_ - __end_) >= __n) {
+      _T              __val_copy = __val;
+      const size_type __elems_after = end() - __pos;
+      iterator        __old_end(__end_);
+
+      if (__elems_after > __n) {
+        std::uninitialized_copy(__end_ - __n, __end_, __end_);
+        __end_ += __n;
+        __copy_backward(__pos, __old_end - __n, __old_end);
+        _fill(__pos, __pos + __n, __val_copy);
+      } else {
+        std::uninitialized_copy_n(__end_, __n - __elems_after, __val_copy);
+        __end_ += __n - __elems_after;
+        std::uninitialized_copy(__pos, __old_end, __end_);
+        __end_ += __elems_after;
+        fill(__pos, __old_end, __val_copy);
+      }
+    } else {
+      const size_type __old_size = size();
+      const size_type __len =
+          __old_size + (__old_size >= __n ? __old_size : __n);
+      iterator __new_begin(_allocate(__len));
+      iterator __new_end(__new_begin);
+
+      try {
+        __new_end = std::uninitialized_copy(begin(), __pos, __new_begin);
+        __new_end = std::uninitialized_fill_n(__new_end, __n, __val);
+        __new_end = std::uninitialized_copy(__pos, end(), __new_end);
+      } catch (...) {
+        _Destroy(__new_begin, __new_end);
+        _deallocate(__new_begin.base(), __len);
+        throw;
+      }
+      _Destroy(__begin_, __end_);
+      _deallocate(__begin_, __end_cap_pointer_ - __begin_);
+      __begin_ = __new_begin.base();
+      __end_ = __new_end.base();
+      __end_cap_pointer_ = __new_begin.base() + __len;
+    }
+  }
+}
+
+template <class _T, class _Allocator>
+template <class _InputIterator>
+void vector<_T, _Allocator>::__range_insert(iterator       __pos,
+                                            _InputIterator __first,
+                                            _InputIterator __last) {
+  for (; __first != __last; ++__first) {
+    __pos = insert(__pos, *__first);
+    ++__pos;
   }
 }
 
