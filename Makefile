@@ -2,8 +2,11 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 RM = rm -rf
 NAME = test
+VECTOR = vector
 
-SRCS = main.cpp
+VECTOR_SRCS = vector_test.cpp
+VECTOR_OBJS = $(addprefix $(OBJ_DIR)/, $(VECTOR_SRCS:.cpp=.o))
+
 INCS = vector.hpp \
 				stack.hpp \
 				map.hpp \
@@ -19,6 +22,11 @@ $(NAME): $(OBJS) $(INCS)
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 	@printf "💡 Make $(NAME) Done\n"
 	@./test
+
+$(VECTOR): $(VECTOR_OBJS) $(INCS)
+	@$(CXX) $(CXXFLAGS) $(VECTOR_OBJS) -o $@
+	@printf "💡 Make $(VECTOR) Done\n"
+	@./vector
 
 $(OBJ_DIR)/%.o : %.cpp
 	@mkdir -p $(OBJ_DIR)
