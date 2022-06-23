@@ -16,7 +16,7 @@ struct random_access_iterator_tag : public bidirectional_iterator_tag {};
 template <typename Category, typename T, typename Distance = ptrdiff_t,
           typename Pointer = T*, typename Reference = T&>
 struct iterator {
-  typedef Category  iterator_traits;
+  typedef Category  iterator_category;
   typedef T         value_type;
   typedef Distance  difference_type;
   typedef Pointer   pointer;
@@ -155,7 +155,7 @@ bool operator>=(const reverse_iterator<Iter>& __lhs,
   return __lhs.base() >= __rhs.base();
 }
 template <class Iter>
-typename reverse_iterator<Iter>::diffrence_type operator-(
+typename reverse_iterator<Iter>::difference_type operator-(
     const reverse_iterator<Iter>& __lhs, const reverse_iterator<Iter>& __rhs) {
   return __rhs.base() - __lhs.base();
 }
