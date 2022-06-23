@@ -229,7 +229,7 @@ class vector : private __vector_base<_T, _Allocator> {
         _Destroy(__i, end());
       } else {
         __copy_trivial(__x.begin(), __x.begin() + size(), __begin_);
-        std::uninitialized_copy(__x.begin() + size(), __x.end(), __end_);
+        __copy_trivial(__x.begin() + size(), __x.end(), __end_);
       }
       __end_ = __begin_ + __xlen;
     }
@@ -398,7 +398,7 @@ void vector<_T, _Allocator>::__assign_aux(_ForwardIterator __first,
   if (__len > capacity()) {
     pointer __tmp = allocator_type::allocate(__len);
     try {
-      std::uninitialized_copy(__first, __last, __tmp);
+      __copy_trivial(__first, __last, __tmp);
     } catch (...) {
       allocator_type::deallocate(__tmp, __len);
     }
@@ -414,7 +414,7 @@ void vector<_T, _Allocator>::__assign_aux(_ForwardIterator __first,
     _ForwardIterator __mid = __first;
     ft::advance(__mid, size());
     __copy_trivial(__first, __mid, __begin_);
-    __end_ = std::uninitialized_copy(__mid, __last, __end_);
+    __end_ = __copy_trivial(__mid, __last, __end_);
   }
 }
 
@@ -449,10 +449,10 @@ void vector<_T, _Allocator>::__insert_aux(iterator  __position,
     iterator        __new_start(_allocate(__len));
     iterator        __new_finish(__new_start);
     try {
-      __new_finish = std::uninitialized_copy(begin(), __position, __new_start);
+      __new_finish = __copy_trivial(begin(), __position, __new_start);
       _Construct(__new_finish.base(), __val);
       ++__new_finish;
-      __new_finish = std::uninitialized_copy(__position, end(), __new_finish);
+      __new_finish = __copy_trivial(__position, end(), __new_finish);
     } catch (...) {
       _Destroy(__new_start, __new_finish);
       _deallocate(__new_start.base(), __len);
@@ -479,10 +479,10 @@ void vector<_T, _Allocator>::__insert_aux(iterator __position) {
     iterator        __new_start = _allocate(__len);
     iterator        __new_finish(__new_start);
     try {
-      __new_finish = std::uninitialized_copy(begin(), __position, __new_start);
+      __new_finish = __copy_trivial(begin(), __position, __new_start);
       _Construct(__new_finish);
       ++__new_finish;
-      __new_finish = std::uninitialized_copy(__position, end(), __new_finish);
+      __new_finish = __copy_trivial(__position, end(), __new_finish);
     } catch (...) {
       _Destroy(__new_start, __new_finish);
       _deallocate(__new_start.base(), __len);
@@ -506,14 +506,14 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
       iterator        __old_end(__end_);
 
       if (__elems_after > __n) {
-        std::uninitialized_copy(__end_ - __n, __end_, __end_);
+        __copy_trivial(__end_ - __n, __end_, __end_);
         __end_ += __n;
         __copy_backward(__pos, __old_end - __n, __old_end);
         _fill(__pos, __pos + __n, __val_copy);
       } else {
-        std::uninitialized_copy_n(__end_, __n - __elems_after, __val_copy);
+        __copy_trivial_n(__end_, __n - __elems_after, __val_copy);
         __end_ += __n - __elems_after;
-        std::uninitialized_copy(__pos, __old_end, __end_);
+        __copy_trivial(__pos, __old_end, __end_);
         __end_ += __elems_after;
         fill(__pos, __old_end, __val_copy);
       }
@@ -525,9 +525,9 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
       iterator __new_end(__new_begin);
 
       try {
-        __new_end = std::uninitialized_copy(begin(), __pos, __new_begin);
+        __new_end = __copy_trivial(begin(), __pos, __new_begin);
         __new_end = std::uninitialized_fill_n(__new_end, __n, __val);
-        __new_end = std::uninitialized_copy(__pos, end(), __new_end);
+        __new_end = __copy_trivial(__pos, end(), __new_end);
       } catch (...) {
         _Destroy(__new_begin, __new_end);
         _deallocate(__new_begin.base(), __len);
