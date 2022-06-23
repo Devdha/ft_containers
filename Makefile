@@ -1,19 +1,28 @@
-CC = c++
+CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 RM = rm -rf
-NAME = megaphone
+NAME = test
 
-SRCS = megaphone.cpp
+SRCS = main.cpp
+INCS = vector.hpp \
+				stack.hpp \
+				map.hpp \
+				set.hpp \
+				rbtree.hpp \
+				algorithm.hpp \
+				iterator.hpp \
+				type_traits.hpp
 OBJ_DIR = ./obj
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
-$(NAME): $(OBJS)
-	@$(CC) $(CXXFLAGS) $(OBJS) -o $@
+$(NAME): $(OBJS) $(INCS)
+	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 	@printf "💡 Make $(NAME) Done\n"
+	@./test
 
 $(OBJ_DIR)/%.o : %.cpp
 	@mkdir -p $(OBJ_DIR)
-	@$(CC) $(CXXFLAGS) -c $< -o $@ -g
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ -g
 
 all: $(NAME)
 
