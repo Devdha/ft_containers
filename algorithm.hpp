@@ -29,9 +29,9 @@ _OutputIter __copy_trivial(_InputIter __first, _InputIter __last,
 }
 
 template <typename _BidirectionalIter1, typename _BidirectionalIter2>
-inline _BidirectionalIter2 __copy_backward(_BidirectionalIter1 __first,
-                                           _BidirectionalIter1 __last,
-                                           _BidirectionalIter2 __result) {
+_BidirectionalIter2 __copy_backward(_BidirectionalIter1 __first,
+                                    _BidirectionalIter1 __last,
+                                    _BidirectionalIter2 __result) {
   while (__first != __last) *--__result = *--__last;
   return __result;
 }
