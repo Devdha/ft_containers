@@ -8,9 +8,17 @@ namespace ft {
 
 // ================================================================
 // memset
-void _fill(char* __first, char* __last, const char& __c) {
-  char __tmp = __c;
-  memset(__first, static_cast<unsigned char>(__tmp), __last - __first);
+
+template <typename _T>
+void _fill(_T* __first, _T* __last, const _T& __c) {
+  _T __tmp = __c;
+  memset(__first, __tmp, __last - __first);
+}
+
+template <typename _T, typename _Size>
+_T* _fill_n(_T* __first, _Size __n, const _T& __c) {
+  _fill(__first, __first + __n, __c);
+  return __first + __n;
 }
 
 // ================================================================
@@ -42,6 +50,9 @@ _T* __copy_backward(const _T* __first, const _T* __last, _T* __result) {
   memmove(__result - __n, __first, sizeof(_T) * __n);
   return __result - __n;
 }
+
+// ================================================================
+// fill
 
 // ================================================================
 // Construct

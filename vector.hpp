@@ -472,13 +472,13 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
         ft::__copy_trivial(__end_ - __n, __end_, __end_);
         __end_ += __n;
         ft::__copy_backward(__pos, __old_end - __n, __old_end);
-        _fill(__pos, __pos + __n, __val_copy);
+        _fill(&*__pos, &*__pos + __n, __val_copy);
       } else {
-        std::uninitialized_copy_n(__end_, __n - __elems_after, __val_copy);
+        _fill_n(__end_, __n - __elems_after, __val_copy);
         __end_ += __n - __elems_after;
         ft::__copy_trivial(__pos, __old_end, __end_);
         __end_ += __elems_after;
-        fill(__pos, __old_end, __val_copy);
+        _fill(&*__pos, &*__old_end, __val_copy);
       }
     } else {
       const size_type __old_size = size();
@@ -489,7 +489,7 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
 
       try {
         __new_end = ft::__copy_trivial(begin(), __pos, __new_begin);
-        __new_end = std::uninitialized_fill_n(__new_end, __n, __val);
+        __new_end = iterator(_fill_n(&*__new_end, __n, __val));
         __new_end = ft::__copy_trivial(__pos, end(), __new_end);
       } catch (...) {
         _Destroy(__new_begin, __new_end);
