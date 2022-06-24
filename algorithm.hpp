@@ -55,6 +55,11 @@ void _Construct(_T1* __p) {
   new (static_cast<void*>(__p)) _T1();
 }
 
+template <class _T>
+void _Destroy(_T* __pointer) {
+  __pointer->~_T();
+}
+
 template <class _ForwardIterator>
 void __destroy_aux(_ForwardIterator __first, _ForwardIterator __last,
                    __false_type) {
@@ -63,11 +68,6 @@ void __destroy_aux(_ForwardIterator __first, _ForwardIterator __last,
 
 template <class _ForwardIterator>
 void __destroy_aux(_ForwardIterator, _ForwardIterator, __true_type) {}
-
-template <class _T>
-void _Destroy(_T* __pointer) {
-  __pointer->~_T();
-}
 
 template <class _ForwardIterator>
 void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
