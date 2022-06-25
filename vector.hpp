@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -474,16 +475,11 @@ void vector<_T, _Allocator>::__insert_aux(iterator  __position,
     const size_type __len = __old_size != 0 ? 2 * __old_size : 1;
     iterator        __new_start(_allocate(__len));
     iterator        __new_finish(__new_start);
-    try {
-      __new_finish = ft::__copy_trivial(begin(), __position, __new_start);
-      _Construct(__new_finish.base(), __val);
-      ++__new_finish;
-      __new_finish = ft::__copy_trivial(__position, end(), __new_finish);
-    } catch (...) {
-      _Destroy(__new_start, __new_finish);
-      _deallocate(__new_start.base(), __len);
-      throw;
-    }
+
+    __new_finish = ft::__copy_trivial(begin(), __position, __new_start);
+    _Construct(__new_finish.base(), __val);
+    ++__new_finish;
+    __new_finish = ft::__copy_trivial(__position, end(), __new_finish);
     _Destroy(begin(), end());
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
     __begin_ = __new_start.base();
@@ -504,16 +500,12 @@ void vector<_T, _Allocator>::__insert_aux(iterator __position) {
     const size_type __len = __old_size != 0 ? 2 * __old_size : 1;
     iterator        __new_start = _allocate(__len);
     iterator        __new_finish(__new_start);
-    try {
-      __new_finish = ft::__copy_trivial(begin(), __position, __new_start);
-      _Construct(__new_finish);
-      ++__new_finish;
-      __new_finish = ft::__copy_trivial(__position, end(), __new_finish);
-    } catch (...) {
-      _Destroy(__new_start, __new_finish);
-      _deallocate(__new_start.base(), __len);
-      throw;
-    }
+
+    __new_finish = ft::__copy_trivial(begin(), __position, __new_start);
+    _Construct(__new_finish);
+    ++__new_finish;
+    __new_finish = ft::__copy_trivial(__position, end(), __new_finish);
+
     _Destroy(begin(), end());
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
     __begin_ = __new_start.base();
@@ -550,15 +542,10 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
       iterator __new_begin(_allocate(__len));
       iterator __new_end(__new_begin);
 
-      try {
-        __new_end = ft::__copy_trivial(begin(), __pos, __new_begin);
-        __new_end = iterator(_fill_n(&*__new_end, __n, __val));
-        __new_end = ft::__copy_trivial(__pos, end(), __new_end);
-      } catch (...) {
-        _Destroy(__new_begin, __new_end);
-        _deallocate(__new_begin.base(), __len);
-        throw;
-      }
+      __new_end = ft::__copy_trivial(begin(), __pos, __new_begin);
+      __new_end = iterator(_fill_n(&*__new_end, __n, __val));
+      __new_end = ft::__copy_trivial(__pos, end(), __new_end);
+
       _Destroy(__begin_, __end_);
       _deallocate(__begin_, __end_cap_pointer_ - __begin_);
       __begin_ = __new_begin.base();
