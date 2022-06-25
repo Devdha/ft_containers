@@ -88,6 +88,24 @@ void _Destroy(_ForwardIterator __first, _ForwardIterator __last) {
   __destroy_aux(__first, __last, _Has_trivial_destructor());
 }
 
+// ================================================================
+// equal
+template <typename _InputIter1, typename _InputIter2>
+bool equal(_InputIter1 __first1, _InputIter1 __last1, _InputIter2 __first2) {
+  for (; __first1 != __last1; ++__first1, ++__first2)
+    if (!(*__first1 == *__first2)) return false;
+  return true;
+}
+
+template <typename _InputIter1, typename _InputIter2>
+bool lexicographical_compare(_InputIter1 __first1, _InputIter1 __last1,
+                             _InputIter2 __first2, _InputIter2 __last2) {
+  for (; __first1 != __last1 && __first2 != __last2; ++__first1, ++__first2) {
+    if (*__first1 < *__first2) return true;
+    if (*__first2 < *__first1) return false;
+  }
+  return __first1 == __last1 && __first2 != __last2;
+}
 }  // namespace ft
 
 #endif  // ALGORITHM_HPP
