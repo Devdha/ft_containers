@@ -368,8 +368,8 @@ class vector : private __vector_base<_T, _Allocator> {
   iterator erase(iterator __first, iterator __last) {
     iterator __i(ft::__copy_trivial(__last, end(), __first));
     _Destroy(__i, end());
-    // __end_ =
-    return __i;
+    __end_ = __end_ - (__last - __first);
+    return __first;
   }
 
   void swap(vector &__x) {
@@ -434,11 +434,10 @@ void vector<_T, _Allocator>::__fill_assign(size_t            __n,
     vector<_T, _Allocator> __tmp(__n, __val, get_allocator());
     __tmp.swap(*this);
   } else if (__n > size()) {
-    // fill(begin(), end(), __val);
-    __end_ = std::uninitialized_fill_n(__end_, __n - size(), __val);
-  }
-  // else
-  // erase(std::fill_n(begin(), __n, __val), end());
+    _fill(__begin_, __end_, __val);
+    __end_ = _fill_n(__end_, __n - size(), __val);
+  } else
+    erase(__make_iter(_fill_n(__begin_, __n, __val)), end());
 }
 
 template <class _T, class _Allocator>
