@@ -196,16 +196,26 @@ class vector : private __vector_base<_T, _Allocator> {
   vector(InputIterator __first, InputIterator __last,
          const allocator_type &__a = allocator_type())
       : _base(__a) {
-    size_type __n = __distance(__first, __last);
-    __begin_ = __alloc_type_.allocate(__n);
-    __end_ = __begin_ + __n;
-    __end_cap_pointer_ = __begin_ + __n;
-    for (; __first != __last; ++__first) push_back(*__first);
+    typedef typename _Is_integer<InputIterator>::_Integral _Integral;
+    __initialize_aux(__first, __last, _Integral());
   }
 
   vector(const vector<_T, _Allocator> &__x)
       : _base(__x.size(), __x.get_allocator()) {
     __end_ = uninitialized_copy(__x.begin(), __x.end(), __begin_);
+  }
+
+  template <class _Integer>
+  void __initialize_aux(_Integer __n, _Integer __value, __true_type) {
+    __begin_ = _allocate(__n);
+    __end_cap_pointer_ = __begin_ + __n;
+    __end_ = _fill_n(__begin_, __n, __value);
+  }
+
+  template <class _InputIterator>
+  void __initialize_aux(_InputIterator __first, _InputIterator __last,
+                        __false_type) {
+    for (; __first != __last; ++__first) push_back(*__first);
   }
 
   ~vector() {
@@ -255,7 +265,12 @@ class vector : private __vector_base<_T, _Allocator> {
 
   // ================================================================
   size_type size() const { return size_type(end() - begin()); }
-  void      resize(size_type n, value_type val = value_type());
+  void      resize(size_type __n, value_type __val = value_type()) {
+         if (__n < size())
+      erase(begin() + __n, end());
+    else
+      insert(end(), __n - size(), __val);
+  }
   size_type max_size() const { return size_type(-1) / sizeof(_T); }
   size_type capacity() const {
     return size_type(const_iterator(__end_cap_pointer_) - begin());
@@ -263,7 +278,17 @@ class vector : private __vector_base<_T, _Allocator> {
   bool empty() const { return begin() == end(); }
 
   // ================================================================
-  void reserve(size_type n);
+  void reserve(size_type __n) {
+    if (capacity() < __n) {
+      const size_type __old_size = size();
+      pointer         __tmp = _allocate_and_copy(__n, __begin_, __end_);
+      _Destroy(__begin_, __end_);
+      _deallocate(__begin_, __end_cap_pointer_ - __begin_);
+      __begin_ = __tmp;
+      __end_ = __tmp + __old_size;
+      __end_cap_pointer_ = __begin_ + __n;
+    }
+  }
 
   reference       operator[](size_type __n) { return this->__begin_[__n]; }
   const_reference operator[](size_type __n) const {
@@ -303,6 +328,11 @@ class vector : private __vector_base<_T, _Allocator> {
     } else {
       __insert_aux(end(), __val);
     }
+  }
+
+  void pop_back() {
+    --__end_;
+    _Destroy(__end_);
   }
 
   template <class InputIterator>
@@ -355,6 +385,40 @@ class vector : private __vector_base<_T, _Allocator> {
 
 // ================================================================
 // vector: Private functions implement
+
+template <class _T, class _Alloc>
+bool operator==(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return __x.size() == __y.size() &&
+         ft::equal(__x.begin(), __x.end(), __y.begin());
+}
+
+template <class _T, class _Alloc>
+bool operator<(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return ft::lexicographical_compare(__x.begin(), __x.end(), __y.begin(),
+                                     __y.end());
+}
+
+template <class _T, class _Alloc>
+bool operator!=(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return !(__x == __y);
+}
+
+template <class _T, class _Alloc>
+bool operator>(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return __y < __x;
+}
+
+template <class _T, class _Alloc>
+bool operator<=(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return !(__y < __x);
+}
+
+template <class _T, class _Alloc>
+bool operator>=(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
+  return !(__x < __y);
+}
+
+// ================================================================
 
 template <class _T, class _Allocator>
 void vector<_T, _Allocator>::__range_check(size_type __n) const {
