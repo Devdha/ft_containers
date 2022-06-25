@@ -11,13 +11,13 @@ namespace ft {
 
 template <typename _T>
 void _fill(_T* __first, _T* __last, const _T& __c) {
-  _T __tmp = __c;
+  unsigned char __tmp = __c;
   memset(__first, __tmp, __last - __first);
 }
 
 template <typename _T, typename _Size>
 _T* _fill_n(_T* __first, _Size __n, const _T& __c) {
-  _fill(__first, __first + __n, __c);
+  for (_Size i = 0; i < __n; i++) *(__first + i) = __c;
   return __first + __n;
 }
 
