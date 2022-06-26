@@ -158,7 +158,7 @@ template <class _Iter1, class _Iter2>
 typename reverse_iterator<_Iter1>::difference_type operator-(
     const reverse_iterator<_Iter1>& __lhs,
     const reverse_iterator<_Iter2>& __rhs) {
-  return __lhs.base() - __rhs.base();
+  return __rhs.base() - __lhs.base();
 }
 template <class _Iter>
 reverse_iterator<_Iter> operator+(
