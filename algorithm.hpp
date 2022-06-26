@@ -9,10 +9,31 @@ namespace ft {
 // ================================================================
 // memset
 
-template <typename _T>
-void _fill(_T* __first, _T* __last, const _T& __c) {
+// template <typename _T>
+// void _fill(_T* __first, _T* __last, const _T& __c) {
+//   unsigned char __tmp = __c;
+//   memset(__first, __tmp, __last - __first);
+// }
+
+void _fill(unsigned char* __first, unsigned char* __last,
+           const unsigned char& __c) {
   unsigned char __tmp = __c;
   memset(__first, __tmp, __last - __first);
+}
+
+void _fill(signed char* __first, signed char* __last, const signed char& __c) {
+  signed char __tmp = __c;
+  memset(__first, static_cast<unsigned char>(__tmp), __last - __first);
+}
+
+void _fill(char* __first, char* __last, const char& __c) {
+  char __tmp = __c;
+  memset(__first, static_cast<unsigned char>(__tmp), __last - __first);
+}
+
+template <typename _ForwardIter, typename _T>
+void _fill(_ForwardIter __first, _ForwardIter __last, const _T& __value) {
+  for (; __first != __last; ++__first) *__first = __value;
 }
 
 template <typename _T, typename _Size>
