@@ -105,18 +105,18 @@ class vector : private __vector_base<_T, _Allocator> {
   using _base::__end_cap_pointer_;
 
  public:
-  typedef _T                                            value_type;
-  typedef value_type                                   *pointer;
-  typedef const value_type                             *const_pointer;
-  typedef __normal_iterator<pointer, vector_type>       iterator;
-  typedef __normal_iterator<const_pointer, vector_type> const_iterator;
-  typedef value_type                                   &reference;
-  typedef const value_type                             &const_reference;
-  typedef size_t                                        size_type;
-  typedef ptrdiff_t                                     difference_type;
-  typedef typename _base::allocator_type                allocator_type;
-  typedef reverse_iterator<const_iterator>              const_reverse_iterator;
-  typedef reverse_iterator<iterator>                    reverse_iterator;
+  typedef _T                               value_type;
+  typedef value_type                      *pointer;
+  typedef const value_type                *const_pointer;
+  typedef pointer                          iterator;
+  typedef const_pointer                    const_iterator;
+  typedef value_type                      &reference;
+  typedef const value_type                &const_reference;
+  typedef size_t                           size_type;
+  typedef ptrdiff_t                        difference_type;
+  typedef typename _base::allocator_type   allocator_type;
+  typedef reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef reverse_iterator<iterator>       reverse_iterator;
 
  private:
   // ================================================================
@@ -203,7 +203,7 @@ class vector : private __vector_base<_T, _Allocator> {
 
   vector(const vector<_T, _Allocator> &__x)
       : _base(__x.size(), __x.get_allocator()) {
-    __end_ = uninitialized_copy(__x.begin(), __x.end(), __begin_);
+    __end_ = __copy_trivial(__x.begin(), __x.end(), __begin_);
   }
 
   template <class _Integer>
@@ -477,14 +477,14 @@ void vector<_T, _Allocator>::__insert_aux(iterator  __position,
     iterator        __new_finish(__new_start);
 
     __new_finish = ft::__copy_trivial(begin(), __position, __new_start);
-    _Construct(__new_finish.base(), __val);
+    _Construct(__new_finish, __val);
     ++__new_finish;
     __new_finish = ft::__copy_trivial(__position, end(), __new_finish);
     _Destroy(begin(), end());
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
-    __begin_ = __new_start.base();
-    __end_ = __new_finish.base();
-    __end_cap_pointer_ = __new_start.base() + __len;
+    __begin_ = __new_start;
+    __end_ = __new_finish;
+    __end_cap_pointer_ = __new_start + __len;
   }
 }
 
@@ -508,9 +508,9 @@ void vector<_T, _Allocator>::__insert_aux(iterator __position) {
 
     _Destroy(begin(), end());
     _deallocate(__begin_, __end_cap_pointer_ - __begin_);
-    __begin_ = __new_start.base();
-    __end_ = __new_finish.base();
-    __end_cap_pointer_ = __new_start.base() + __len;
+    __begin_ = __new_start;
+    __end_ = __new_finish;
+    __end_cap_pointer_ = __new_start + __len;
   }
 }
 
@@ -548,9 +548,9 @@ void vector<_T, _Allocator>::__fill_insert(iterator __pos, size_type __n,
 
       _Destroy(__begin_, __end_);
       _deallocate(__begin_, __end_cap_pointer_ - __begin_);
-      __begin_ = __new_begin.base();
-      __end_ = __new_end.base();
-      __end_cap_pointer_ = __new_begin.base() + __len;
+      __begin_ = __new_begin;
+      __end_ = __new_end;
+      __end_cap_pointer_ = __new_begin + __len;
     }
   }
 }

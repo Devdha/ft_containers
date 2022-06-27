@@ -247,10 +247,10 @@ struct _Is_normal_iterator {
 template <typename _Iterator, typename _Container>
 class __normal_iterator;
 
-template <typename _Iterator, typename _Container>
-struct _Is_normal_iterator<ft::__normal_iterator<_Iterator, _Container> > {
-  typedef __true_type _Normal;
-};
+// template <typename _Iterator, typename _Container>
+// struct _Is_normal_iterator<ft::__normal_iterator<_Iterator, _Container> > {
+//   typedef __true_type _Normal;
+// };
 
 }  // namespace ft
 
