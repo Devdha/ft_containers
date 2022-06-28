@@ -154,6 +154,88 @@ inline bool operator!=(
   return __x._M_node != __y._M_node;
 }
 
+void _Rb_tree_rotate_left(_Rb_tree_node_base*  __x,
+                          _Rb_tree_node_base*& __root) {
+  // set right node as __y
+  _Rb_tree_node_base* __y = __x->_M_right;
+  // connect __y's left child to __x's right child.
+  __x->_M_right = __y->_M_left;
+  if (__y->_M_left != 0) __y->_M_left->_M_parent = __x;
+  __y->_M_parent = __x->_M_parent;
+
+  // connect to it's parent or set as root.
+  if (__x == __root)
+    __root = __y;
+  else if (__x == __x->_M_parent->_M_left)
+    __x->_M_parent->_M_left = __y;
+  else
+    __x->_M_parent->_M_right = __y;
+  __y->_M_left = __x;
+  __x->_M_parent = __y;
+}
+
+void _Rb_tree_rotate_right(_Rb_tree_node_base*  __x,
+                           _Rb_tree_node_base*& __root) {
+  _Rb_tree_node_base* __y = __x->_M_left;
+  __x->_M_left = __y->_M_right;
+  if (__y->_M_right != 0) __y->_M_right->_M_parent = __x;
+  __y->_M_parent = __x->_M_parent;
+
+  if (__x == __root)
+    __root = __y;
+  else if (__x == __x->_M_parent->_M_right)
+    __x->_M_parent->_M_right = __y;
+  else
+    __x->_M_parent->_M_left = __y;
+  __y->_M_right = __x;
+  __x->_M_parent = __y;
+}
+
+void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
+  // set new node color red.
+  __x->_M_color = _S_red;
+  // while node isn't root and node's parent is red.
+  // rebalance the tree.
+  while (__x != __root && __x->_M_parent->_M_color == _S_red) {
+    // if node's parent is a left child of its parent.
+    if (__x->_M_parent == __x->_M_parent->_M_parent->_M_left) {
+      _Rb_tree_node_base* __y = __x->_M_parent->_M_parent->_M_right;
+      if (__y && __y->_M_color == _S_red) {
+        __x->_M_parent->_M_color = _S_black;
+        __y->_M_color = _S_black;
+        __x->_M_parent->_M_parent->_M_color = _S_red;
+        __x = __x->_M_parent->_M_parent;
+      } else {
+        if (__x == __x->_M_parent->_M_right) {
+          __x = __x->_M_parent;
+          _Rb_tree_rotate_left(__x, __root);
+        }
+        __x->_M_parent->_M_color = _S_black;
+        __x->_M_parent->_M_parent->_M_color = _S_red;
+        _Rb_tree_rotate_right(__x->_M_parent->_M_parent, __root);
+      }
+      // if node's parent is a right child of its parent.
+    } else {
+      _Rb_tree_node_base* __y = __x->_M_parent->_M_parent->_M_left;
+      if (__y && __y->_M_color == _S_red) {
+        __x->_M_parent->_M_color = _S_black;
+        __y->_M_color = _S_black;
+        __x->_M_parent->_M_parent->_M_color = _S_red;
+        __x = __x->_M_parent->_M_parent;
+      } else {
+        if (__x == __x->_M_parent->_M_left) {
+          __x = __x->_M_parent;
+          _Rb_tree_rotate_right(__x, __root);
+        }
+        __x->_M_parent->_M_color = _S_black;
+        __x->_M_parent->_M_parent->_M_color = _S_red;
+        _Rb_tree_rotate_left(__x->_M_parent->_M_parent, __root);
+      }
+    }
+  }
+  __root->_M_color = _S_black;
+}
+
 }  // namespace ft
 
 #endif  // RBTREE_HPP
