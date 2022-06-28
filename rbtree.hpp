@@ -1,6 +1,8 @@
 #if !defined(RBTREE_HPP)
 #define RBTREE_HPP
 
+#include <memory>
+
 #include "algorithm.hpp"
 
 namespace ft {
@@ -200,18 +202,25 @@ void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
     // if node's parent is a left child of its parent.
     if (__x->_M_parent == __x->_M_parent->_M_parent->_M_left) {
       _Rb_tree_node_base* __y = __x->_M_parent->_M_parent->_M_right;
+      // if uncle node is red.
       if (__y && __y->_M_color == _S_red) {
+        // set parent and uncle node to black and grandparent to red.
         __x->_M_parent->_M_color = _S_black;
         __y->_M_color = _S_black;
         __x->_M_parent->_M_parent->_M_color = _S_red;
+        // set grandparent as __x.
         __x = __x->_M_parent->_M_parent;
       } else {
+        // if __x is a right child.
         if (__x == __x->_M_parent->_M_right) {
+          // set left child to __x and rotate left.
           __x = __x->_M_parent;
           _Rb_tree_rotate_left(__x, __root);
         }
+        // set parent to black and grandparent to red.
         __x->_M_parent->_M_color = _S_black;
         __x->_M_parent->_M_parent->_M_color = _S_red;
+        // rotate right to set parent top.
         _Rb_tree_rotate_right(__x->_M_parent->_M_parent, __root);
       }
       // if node's parent is a right child of its parent.
@@ -233,8 +242,71 @@ void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
       }
     }
   }
+  // root node always has to be black.
   __root->_M_color = _S_black;
 }
+
+_Rb_tree_node_base* _Rb_tree_rebalance_for_erase(
+    _Rb_tree_node_base* __z, _Rb_tree_node_base*& __root,
+    _Rb_tree_node_base*& __leftmost, _Rb_tree_node_base*& __rightmost) {}
+
+template <typename _Tp, typename _Alloc, bool _S_instanceless>
+class _Rb_tree_alloc_base {
+ public:
+  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
+
+  allocator_type get_allocator() const { return _M_node_allocator; }
+
+  _Rb_tree_alloc_base(const allocator_type& __a) : _M_node_allocator(__a) {}
+
+ protected:
+  typename _Alloc_traits<_Rb_tree_node<_Tp>, _Alloc>::allocator_type
+      _M_node_allocator;
+
+  _Rb_tree_node_base _M_header;
+
+  _Rb_tree_node<_Tp>* _M_get_node() { return _M_node_allocator.allocate(1); }
+
+  void _M_put_node(_Rb_tree_node<_Tp>* __p) {
+    _M_node_allocator.deallocate(__p, 1);
+  }
+};
+
+template <typename _Tp, typename _Alloc>
+class _Rb_tree_alloc_base<_Tp, _Alloc, true> {
+ public:
+  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
+
+  allocator_type get_allocator() const { return allocator_type(); }
+
+  _Rb_tree_alloc_base(const allocator_type&) {}
+
+ protected:
+  _Rb_tree_node_base _M_header;
+
+  typedef typename _Alloc_traits<_Rb_tree_node<_Tp>, _Alloc>::_Alloc_type
+      _Alloc_type;
+
+  _Rb_tree_node<_Tp>* _M_get_node() { return _Alloc_type::allocate(1); }
+
+  void _M_put_node(_Rb_tree_node<_Tp>* __p) { _Alloc_type::deallocate(__p, 1); }
+};
+
+template <typename _Tp, typename _Alloc>
+struct _Rb_tree_base
+    : public _Rb_tree_alloc_base<_Tp, _Alloc,
+                                 _Alloc_traits<_Tp, _Alloc>::_S_instanceless> {
+  typedef _Rb_tree_alloc_base<_Tp, _Alloc,
+                              _Alloc_traits<_Tp, _Alloc>::_S_instanceless>
+                                         _Base;
+  typedef typename _Base::allocator_type allocator_type;
+
+  _Rb_tree_base(const allocator_type& __a) : _Base(__a) {}
+};
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc = std::allocator<_Val> >
+class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {};
 
 }  // namespace ft
 
