@@ -15,6 +15,8 @@ namespace ft {
 //   memset(__first, __tmp, __last - __first);
 // }
 
+// ================================================================
+// fill
 void _fill(unsigned char* __first, unsigned char* __last,
            const unsigned char& __c) {
   unsigned char __tmp = __c;
@@ -71,9 +73,6 @@ _T* __copy_backward(const _T* __first, const _T* __last, _T* __result) {
   memmove(__result - __n, __first, sizeof(_T) * __n);
   return __result - __n;
 }
-
-// ================================================================
-// fill
 
 // ================================================================
 // Construct
