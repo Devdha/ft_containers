@@ -306,7 +306,145 @@ struct _Rb_tree_base
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
           typename _Alloc = std::allocator<_Val> >
-class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {};
+class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
+  typedef _Rb_tree_base<_Val, _Alloc> _Base;
+
+ protected:
+  typedef _Rb_tree_node_base* _Base_ptr;
+  typedef _Rb_tree_node<_Val> _Rb_tree_node;
+
+ public:
+  typedef _Key              key_type;
+  typedef _Val              value_type;
+  typedef value_type*       pointer;
+  typedef const value_type* const_pointer;
+  typedef value_type&       reference;
+  typedef const value_type& const_reference;
+  typedef _Rb_tree_node*    _Link_type;
+  typedef size_t            size_type;
+  typedef ptrdiff_t         difference_type;
+
+  typedef typename _Base::allocator_type allocator_type;
+  allocator_type get_allocator() const { return _Base::get_allocator(); }
+
+ protected:
+  using _Base::_M_get_node;
+  using _Base::_M_header;
+  using _Base::_M_put_node;
+
+  _Link_type _M_create_node(const value_type& __x) {
+    _Link_type __tmp = _M_get_node();
+    try {
+      _Construct(&__tmp->_M_value_field, __x);
+    } catch (...) {
+      _M_put_node(__tmp);
+      throw;
+    }
+    return __tmp;
+  }
+
+  _Link_type _M_clone_node(_Link_type __x) {
+    _Link_type __tmp = _M_create_node(__x->_M_value_field);
+    __tmp->_M_color = __x->_M_color;
+    __tmp->_M_left = 0;
+    __tmp->_M_right = 0;
+    return __tmp;
+  }
+
+  void destroy_node(_Link_type __p) {
+    _Destroy(&__p->_M_value_field);
+    _M_put_node(__p);
+  }
+
+  size_type _M_node_count;
+  _Compare  _M_key_compare;
+
+  _Link_type& _M_root() const { return (_Link_type&)_M_header._M_parent; }
+  _Link_type& _M_leftmost() const { return (_Link_type&)_M_header._M_left; }
+  _Link_type& _M_rightmost() const { return (_Link_type&)_M_header._M_right; }
+  _Link_type  _M_end() const { return (_Link_type)&_M_header; }
+  static _Link_type& _S_left(_Link_type __x) {
+    return (_Link_type&)(__x->_M_left);
+  }
+  static _Link_type& _S_right(_Link_type __x) {
+    return (_Link_type&)(__x->_M_right);
+  }
+  static _Link_type& _S_parent(_Link_type __x) {
+    return (_Link_type&)(__x->_M_parent);
+  }
+  static reference   _S_value(_Link_type __x) { return __x->_M_value_field; }
+  static const _Key& _S_key(_Link_type __x) {
+    return _KeyOfValue()(__x->_M_value_field);
+  }
+  static _Link_type& _S_left(_Base_ptr __x) {
+    return (_Link_type&)(__x->_M_left);
+  }
+  static _Link_type& _S_right(_Base_ptr __x) {
+    return (_Link_type&)(__x->_M_right);
+  }
+  static _Link_type& _S_parent(_Base_ptr __x) {
+    return (_Link_type&)(__x->_M_parent);
+  }
+  static reference _S_value(_Base_ptr __x) {
+    return ((_Link_type)__x)->_M_value_field;
+  }
+  static const _Key& _S_key(_Base_ptr __x) {
+    return _KeyOfValue()(_S_value(_Link_type(__x)));
+  }
+  static _Rb_tree_color& _S_color(_Base_ptr __x) { return __x->_M_color; }
+  static _Link_type      _S_minimum(_Link_type __x) {
+         return (_Link_type)_Rb_tree_node_base::_S_minimum(__x);
+  }
+  static _Link_type _S_maximum(_Link_type __x) {
+    return (_Link_type)_Rb_tree_node_base::_S_maximum(__x);
+  }
+
+ public:
+  typedef _Rb_tree_iterator<value_type, reference, pointer> iterator;
+  typedef _Rb_tree_iterator<value_type, const_reference, const_pointer>
+      const_iterator;
+
+  typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef ft::reverse_iterator<iterator>       reverse_iterator;
+
+ private:
+  iterator _M_insert(_Base_ptr __x, _Base_ptr __y, const value_type& __v);
+
+  _Link_type _M_copy(_Link_type __x, _Link_type __p);
+
+  void _M_erase(_Link_type __x);
+
+ public:
+  _Rb_tree() : _Base(allocator_type()), _M_node_count(0) {
+    _M_empty_initialize();
+  }
+
+  _Rb_tree(const _Compare& __comp)
+      : _Base(allocator_type()), _M_node_count(0), _M_key_compare(__comp) {
+    _M_empty_initialize();
+  }
+
+  _Rb_tree(const _Compare& __comp, const allocator_type& __a)
+      : _Base(__a), _M_node_count(0), _M_key_compare(__comp) {
+    _M_empty_initialize();
+  }
+
+  _Rb_tree(const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x)
+      : _Base(__x.get_allocator()),
+        _M_node_count(0),
+        _M_key_compare(__x._M_key_compare) {
+    if (__x._M_root() == 0)
+      _M_empty_initialize();
+    else {
+      // ?????????????
+      _S_color(&this->_M_header) = _S_red;
+      _M_root() = _M_copy(__x._M_root(), _M_end());
+      _M_leftmost() = _S_minimum(_M_root());
+      _M_rightmost() = _S_maximum(_M_root());
+    }
+    _M_node_count = __x._M_node_count;
+  }
+};
 
 }  // namespace ft
 
