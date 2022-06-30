@@ -126,6 +126,14 @@ bool lexicographical_compare(_InputIter1 __first1, _InputIter1 __last1,
   }
   return __first1 == __last1 && __first2 != __last2;
 }
+
+template <typename _T>
+void swap(_T& __a, _T& __b) {
+  _T __tmp = __a;
+  __a = __b;
+  __b = __tmp;
+}
+
 }  // namespace ft
 
 #endif  // ALGORITHM_HPP
