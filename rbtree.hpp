@@ -250,56 +250,32 @@ _Rb_tree_node_base* _Rb_tree_rebalance_for_erase(
     _Rb_tree_node_base* __z, _Rb_tree_node_base*& __root,
     _Rb_tree_node_base*& __leftmost, _Rb_tree_node_base*& __rightmost) {}
 
-template <typename _Tp, typename _Alloc, bool _S_instanceless>
+template <typename _Tp, typename _Alloc>
 class _Rb_tree_alloc_base {
  public:
-  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
+  typedef _Alloc                                allocator_type;
+  typedef std::allocator_traits<allocator_type> _Alloc_traits;
 
-  allocator_type get_allocator() const { return _M_node_allocator; }
+  allocator_type get_allocator() const { return allocator_type(); }
 
-  _Rb_tree_alloc_base(const allocator_type& __a) : _M_node_allocator(__a) {}
+  _Rb_tree_alloc_base(const allocator_type& __a) : __alloc_type_(__a) {}
 
  protected:
-  typename _Alloc_traits<_Rb_tree_node<_Tp>, _Alloc>::allocator_type
-      _M_node_allocator;
+  allocator_type __alloc_type_;
 
   _Rb_tree_node_base _M_header;
 
-  _Rb_tree_node<_Tp>* _M_get_node() { return _M_node_allocator.allocate(1); }
+  _Rb_tree_node<_Tp>* _M_get_node() { return __alloc_type_.allocate(1); }
 
   void _M_put_node(_Rb_tree_node<_Tp>* __p) {
-    _M_node_allocator.deallocate(__p, 1);
+    __alloc_type_.deallocate(__p, 1);
   }
 };
 
 template <typename _Tp, typename _Alloc>
-class _Rb_tree_alloc_base<_Tp, _Alloc, true> {
- public:
-  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
-
-  allocator_type get_allocator() const { return allocator_type(); }
-
-  _Rb_tree_alloc_base(const allocator_type&) {}
-
- protected:
-  _Rb_tree_node_base _M_header;
-
-  typedef typename _Alloc_traits<_Rb_tree_node<_Tp>, _Alloc>::_Alloc_type
-      _Alloc_type;
-
-  _Rb_tree_node<_Tp>* _M_get_node() { return _Alloc_type::allocate(1); }
-
-  void _M_put_node(_Rb_tree_node<_Tp>* __p) { _Alloc_type::deallocate(__p, 1); }
-};
-
-template <typename _Tp, typename _Alloc>
-struct _Rb_tree_base
-    : public _Rb_tree_alloc_base<_Tp, _Alloc,
-                                 _Alloc_traits<_Tp, _Alloc>::_S_instanceless> {
-  typedef _Rb_tree_alloc_base<_Tp, _Alloc,
-                              _Alloc_traits<_Tp, _Alloc>::_S_instanceless>
-                                         _Base;
-  typedef typename _Base::allocator_type allocator_type;
+struct _Rb_tree_base : public _Rb_tree_alloc_base<_Tp, _Alloc> {
+  typedef _Rb_tree_alloc_base<_Tp, _Alloc> _Base;
+  typedef typename _Base::allocator_type   allocator_type;
 
   _Rb_tree_base(const allocator_type& __a) : _Base(__a) {}
 };
