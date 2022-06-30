@@ -16,7 +16,7 @@ struct _Rb_tree_node_base {
   _Base_ptr      _M_left;
   _Base_ptr      _M_right;
 
-  static _Base_ptr _S_minumum(_Base_ptr __x) {
+  static _Base_ptr _S_minimum(_Base_ptr __x) {
     while (__x->_M_left != 0) __x = __x->_M_left;
     return __x;
   }
@@ -412,7 +412,6 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
     if (__x._M_root() == 0)
       _M_empty_initialize();
     else {
-      // ?????????????
       _S_color(&this->_M_header) = _S_red;
       _M_root() = _M_copy(__x._M_root(), _M_end());
       _M_leftmost() = _S_minimum(_M_root());
@@ -420,6 +419,86 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
     }
     _M_node_count = __x._M_node_count;
   }
+
+  ~_Rb_tree() { clear(); }
+
+  _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& operator=(
+      const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x);
+
+ private:
+  void _M_empty_initialize() {
+    _S_color(&this->_M_header) = _S_red;
+    _M_root() = 0;
+    _M_leftmost() = _M_end();
+    _M_rightmost() = _M_end();
+  }
+
+ public:
+  _Compare key_comp() const { return _M_key_compare; }
+
+  iterator       begin() { return _M_leftmost(); }
+  const_iterator begin() const { return _M_leftmost(); }
+  iterator       end() { return &_M_header; }
+  const_iterator end() const { return &_M_header; }
+
+  reverse_iterator       rbegin() { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+  reverse_iterator       rend() { return reverse_iterator(begin()); }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
+
+  bool      empty() const { return _M_node_count == 0; }
+  size_type size() const { return _M_node_count; }
+  size_type max_size() const { return size_type(-1); }
+
+  void swap(_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t);
+
+  pair<iterator, bool> insert_unique(const value_type& __x);
+
+  iterator insert_equal(const value_type& __x);
+
+  iterator insert_unique(iterator __position, const value_type& __x);
+
+  iterator insert_equal(iterator __position, const value_type& __x);
+
+  template <typename _InputIterator>
+  void insert_unique(_InputIterator __first, _InputIterator __last);
+
+  template <typename _InputIterator>
+  void insert_equal(_InputIterator __first, _InputIterator __last);
+
+  void erase(iterator __position);
+
+  size_type erase(const key_type& __x);
+
+  void erase(iterator __first, iterator __last);
+
+  void erase(const key_type* __first, const key_type* __last);
+
+  void clear() {
+    if (_M_node_count != 0) {
+      _M_erase(_M_root());
+      _M_leftmost() = _M_end();
+      _M_root() = 0;
+      _M_rightmost() = _M_end();
+      _M_node_count = 0;
+    }
+  }
+
+  iterator       find(const key_type& __x);
+  const_iterator find(const key_type& __x) const;
+  size_type      count(const key_type& __x) const;
+
+  iterator       lower_bound(const key_type& __x);
+  const_iterator lower_bound(const key_type& __x) const;
+  iterator       upper_bound(const key_type& __x);
+  const_iterator upper_bound(const key_type& __x) const;
+
+  pair<iterator, iterator>             equal_range(const key_type& __x);
+  pair<const_iterator, const_iterator> equal_range(const key_type& __x) const;
 };
 
 }  // namespace ft
