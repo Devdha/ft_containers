@@ -501,6 +501,54 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   pair<const_iterator, const_iterator> equal_range(const key_type& __x) const;
 };
 
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator==(
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return __x.size() == __y.size() && equal(__x.begin(), __x.end(), __y.begin());
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator!=(
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return __x.size() != __y.size() ||
+         !equal(__x.begin(), __x.end(), __y.begin());
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator<(const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+               const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return ft::lexicographical_compare(__x.begin(), __x.end(), __y.begin(),
+                                     __y.end());
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator>(const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+               const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return __y < __x;
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator<=(
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return !(__y < __x);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+bool operator>=(
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __x,
+    const _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __y) {
+  return !(__x < __y);
+}
+
 }  // namespace ft
 
 #endif  // RBTREE_HPP
