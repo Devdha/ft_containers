@@ -473,17 +473,10 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
 
   pair<iterator, bool> insert_unique(const value_type& __x);
 
-  iterator insert_equal(const value_type& __x);
-
   iterator insert_unique(iterator __position, const value_type& __x);
-
-  iterator insert_equal(iterator __position, const value_type& __x);
 
   template <typename _InputIterator>
   void insert_unique(_InputIterator __first, _InputIterator __last);
-
-  template <typename _InputIterator>
-  void insert_equal(_InputIterator __first, _InputIterator __last);
 
   void erase(iterator __position);
 
@@ -606,28 +599,33 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
           typename _Alloc>
-typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
-_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_equal(
-    const _Val& __v) {
-  _Link_type __y = _M_end();
-  _Link_type __x + _M_root();
-  while (__x != 0) {
-    __y = __x;
-    __x = _M_key_compare(_KeyOfValue()(__v), _S_key(__x)) ? _S_left(__x)
-                                                          : _S_right(__x);
-  }
-  return _M_insert(__x, __y, __v);
-}
-
-template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
-          typename _Alloc>
 void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
     _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t) {
   if (_M_root() == 0) {
     if (__t._M_root() != 0) {
+      _M_root() = __t._M_root();
+      _M_leftmost() = __t._M_leftmost();
+      _M_rightmost() = __t._M_rightmost();
+      _M_root()->_M_parent = __t.end();
+
+      __t._M_root() = 0;
+      __t._M_leftmost() = __t._M_end();
+      __t._M_rightmost() = __t._M_end();
     }
   } else if (__t._M_root() == 0) {
+    __t._M_root() = _M_root();
+    __t._M_leftmost() = _M_leftmost();
+    __t._M_rightmost() = _M_rightmost();
+    __t._M_root()->_M_parent = __t.end();
+
+    _M_root() = 0;
+    _M_leftmost() = _M_end();
+    _M_rightmost() = _M_end();
   } else {
+    ft::swap(_M_root(), __t._M_root());
+    ft::swap(_M_leftmost(), __t._M_leftmost());
+    ft::swap(_M_rightmost(), __t._M_rightmost());
+    ft::swap(_M_root()->_M_parent, __t._M_root()->_M_parent);
   }
 }
 
