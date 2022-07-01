@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "algorithm.hpp"
+#include "pair.hpp"
 
 namespace ft {
 enum _Rb_tree_color { _S_red = false, _S_black = true };
@@ -471,7 +472,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
 
   void swap(_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t);
 
-  pair<iterator, bool> insert_unique(const value_type& __x);
+  ft::pair<iterator, bool> insert_unique(const value_type& __x);
 
   iterator insert_unique(iterator __position, const value_type& __x);
 
@@ -505,8 +506,9 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   iterator       upper_bound(const key_type& __x);
   const_iterator upper_bound(const key_type& __x) const;
 
-  pair<iterator, iterator>             equal_range(const key_type& __x);
-  pair<const_iterator, const_iterator> equal_range(const key_type& __x) const;
+  ft::pair<iterator, iterator>             equal_range(const key_type& __x);
+  ft::pair<const_iterator, const_iterator> equal_range(
+      const key_type& __x) const;
 };
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -575,7 +577,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(
 
   // When parent == header || __v's key is less than parent's key.
   // What is __x's role?
-  if (__y == _M_header || __x != 0 ||
+  if (__y == &_M_header || __x != 0 ||
       _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) {
     __z = _M_create_node(__v);
     _S_left(__y) = __z;
@@ -627,6 +629,82 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
     ft::swap(_M_rightmost(), __t._M_rightmost());
     ft::swap(_M_root()->_M_parent, __t._M_root()->_M_parent);
   }
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+ft::pair<typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
+         bool>
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
+    const value_type& __v) {
+  _Link_type __y = _M_end();
+  _Link_type __x = _M_root();
+  bool       __comp = true;
+
+  while (__x != 0) {
+    __y = __x;
+    __comp = _M_key_compare(_KeyOfValue()((__v), _S_key(__x)));
+    __x = __comp ? _S_left(__x) : _S_right(__x);
+  }
+
+  iterator __j = iterator(__y);
+  // what is right order? if {if} else OR if {if else}
+  // if __x is left side of __y, insert __v on left side of __y.
+  if (__comp) {
+    if (__j == begin())
+      return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
+  } else
+    // go back to parent.
+    --__j;
+  // if __x is right side of parent, insert __v on right side of its parent.
+  if (_M_key_compare(_S_key(__j._M_node), _KeyOfValue()(__v)))
+    return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
+  // it means equal. so return fail.
+  else
+    return pair<iterator, bool>(__j, false);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
+    iterator __position, const _Val& __v) {
+  // if __position is leftmost.
+  if (__position._M_node == _M_header._M_left) {
+    if (size() > 0 &&
+        _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node)))
+      return _M_insert(__position._M_node, __position._M_node, __v);
+    else
+      return insert_unique(__v).first;
+    // if __postion is end.
+  } else if (__position._M_node == &_M_header) {
+    if (_M_key_compare(_S_key(_M_rightmost()), _KeyOfValue()(__v)))
+      return _M_insert(0, _M_rightmost(), __v);
+    else
+      return insert_unique(__v).first;
+  } else {
+    iterator __before = __position;
+    --__before;
+    // if value is between __before and __position.
+    if (_M_key_compare(_S_key(__before._M_node), _KeyOfValue()(__v)) &&
+        _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node))) {
+      // if x.right is null.
+      if (_S_right(__before._M_node) == 0)
+        return _M_insert(0, __before._M_node, __v);
+      else
+        return _M_insert(__position._M_node, __position._M_node, __v);
+    } else {
+      return insert_unique(__v).first;
+    }
+  }
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+template <class _Iterator>
+void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
+    _Iterator __first, _Iterator __last) {
+  for (; __first != __last; ++__first) insert_unique(*__first);
 }
 
 }  // namespace ft
