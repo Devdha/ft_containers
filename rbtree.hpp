@@ -515,8 +515,6 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
  private:
   iterator _M_insert(_Base_ptr __x, _Base_ptr __y, const value_type& __v);
 
-  _Link_type _M_copy(_Link_type __x, _Link_type __p);
-
   void _M_erase(_Link_type __x);
 
  public:
@@ -540,12 +538,8 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
         _M_key_compare(__x._M_key_compare) {
     if (__x._M_root() == 0)
       _M_empty_initialize();
-    else {
-      _S_color(&this->_M_header) = _S_red;
-      _M_root() = _M_copy(__x._M_root(), _M_end());
-      _M_leftmost() = _S_minimum(_M_root());
-      _M_rightmost() = _S_maximum(_M_root());
-    }
+    else
+      insert_unique(__x.begin(), __x.end());
     _M_node_count = __x._M_node_count;
   }
 
@@ -557,14 +551,10 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
       clear();
       _M_node_count = 0;
       _M_key_compare = __x._M_key_compare;
-      if (__x._M_root() == 0) {
+      if (__x._M_root() == 0)
         _M_empty_initialize();
-      } else {
-        _M_root() = _M_copy(__x._M_root(), _M_end());
-        _M_leftmost() = _S_minimum(_M_root());
-        _M_rightmost() = _S_maximum(_M_root());
-        _M_node_count = __x._M_node_count;
-      }
+      else
+        insert_unique(__x.begin(), __x.end());
     }
     return *this;
   }
@@ -833,6 +823,26 @@ template <class _Iterator>
 void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
     _Iterator __first, _Iterator __last) {
   for (; __first != __last; ++__first) insert_unique(*__first);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(
+    iterator __position) {
+  _Link_type __y = (_Link_type)_Rb_tree_rebalance_for_erase(
+      __position._M_node, _M_root(), _M_leftmost(), _M_rightmost());
+  destroy_node(__y);
+  --_M_node_count;
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::size_type
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(const _Key& __x) {
+  ft::pair<iterator, iterator> __p = equal_range(__x);
+  size_type                    __n = std::distance(__p.first, __p.second);
+  erase(__p.first, __p.second);
+  return __n;
 }
 
 }  // namespace ft
