@@ -7,6 +7,7 @@ VECTOR = vector
 VECTOR_SRCS = vector_test.cpp
 VECTOR_OBJS = $(addprefix $(OBJ_DIR)/, $(VECTOR_SRCS:.cpp=.o))
 
+SRCS = main.cpp
 INCS = vector.hpp \
 				stack.hpp \
 				map.hpp \
@@ -14,7 +15,8 @@ INCS = vector.hpp \
 				rbtree.hpp \
 				algorithm.hpp \
 				iterator.hpp \
-				type_traits.hpp
+				type_traits.hpp \
+				pair.hpp
 OBJ_DIR = ./obj
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
