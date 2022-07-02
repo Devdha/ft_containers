@@ -118,42 +118,38 @@ struct _Rb_tree_iterator : public _Rb_tree_base_iterator {
 };
 
 template <typename _Val, typename _Ref, typename _Ptr>
-inline bool operator==(const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __x,
-                       const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __y) {
+bool operator==(const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __x,
+                const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __y) {
   return __x._M_node == __y._M_node;
 }
 
 template <typename _Val>
-inline bool operator==(
-    const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __x,
-    const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __y) {
+bool operator==(const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __x,
+                const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __y) {
   return __x._M_node == __y._M_node;
 }
 
 template <typename _Val>
-inline bool operator==(
-    const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __x,
-    const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __y) {
+bool operator==(const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __x,
+                const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __y) {
   return __x._M_node == __y._M_node;
 }
 
 template <typename _Val, typename _Ref, typename _Ptr>
-inline bool operator!=(const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __x,
-                       const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __y) {
+bool operator!=(const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __x,
+                const _Rb_tree_iterator<_Val, _Ref, _Ptr>& __y) {
   return __x._M_node != __y._M_node;
 }
 
 template <typename _Val>
-inline bool operator!=(
-    const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __x,
-    const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __y) {
+bool operator!=(const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __x,
+                const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __y) {
   return __x._M_node != __y._M_node;
 }
 
 template <typename _Val>
-inline bool operator!=(
-    const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __x,
-    const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __y) {
+bool operator!=(const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __x,
+                const _Rb_tree_iterator<_Val, const _Val&, const _Val*>& __y) {
   return __x._M_node != __y._M_node;
 }
 
@@ -989,9 +985,8 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::upper_bound(
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
           typename _Alloc>
-inline pair<
-    typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
-    typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator>
+pair<typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
+     typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator>
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::equal_range(
     const _Key& __k) {
   return pair<iterator, iterator>(lower_bound(__k), upper_bound(__k));
@@ -999,9 +994,8 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::equal_range(
 
 template <typename _Key, typename _Val, typename _KoV, typename _Compare,
           typename _Alloc>
-inline pair<
-    typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator,
-    typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator>
+pair<typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator,
+     typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator>
 _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::equal_range(
     const _Key& __k) const {
   return pair<const_iterator, const_iterator>(lower_bound(__k),
