@@ -249,7 +249,135 @@ void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
 
 _Rb_tree_node_base* _Rb_tree_rebalance_for_erase(
     _Rb_tree_node_base* __z, _Rb_tree_node_base*& __root,
-    _Rb_tree_node_base*& __leftmost, _Rb_tree_node_base*& __rightmost) {}
+    _Rb_tree_node_base*& __leftmost, _Rb_tree_node_base*& __rightmost) {
+  _Rb_tree_node_base* __y = __z;
+  _Rb_tree_node_base* __x = 0;
+  _Rb_tree_node_base* __x_parent = 0;
+
+  // Binary search tree erase algorithm.
+  if (__y->_M_left == 0)  // __y has at most one child.
+    __x = __y->_M_right;
+  else if (__y->_M_right == 0)  // __y has only one child.
+    __x = __y->_M_left;
+  else {  // __y has two children.
+    // set __y as __z's successor(larger and the closest value of __z).
+    __y = __y->_M_right;
+    while (__y->_M_left != 0) __y = __y->_M_left;
+    __x = __y->_M_right;
+  }
+
+  if (__y != __z) {                 // __y is __z's successor.
+    __z->_M_left->_M_parent = __y;  // connect __z's left node to __y.
+    __y->_M_left = __z->_M_left;
+    if (__y != __z->_M_right) {  // __y is not __z's right child.
+      __x_parent = __y->_M_parent;
+      if (__x) __x->_M_parent = __y->_M_parent;  // __x is not null.
+      __y->_M_parent->_M_left = __x;             // connect __y's parent to __x.
+      __y->_M_right = __z->_M_right;  // connect __z's right node to __y.
+      __z->_M_right->_M_parent = __y;
+    } else
+      __x_parent = __y;  // if __y is __z's right child, __x_parent is __y.
+
+    if (__root == __z)  // when __z is root.
+      __root = __y;
+    else if (__z->_M_parent->_M_left == __z)  // when __z is left child.
+      __z->_M_parent->_M_left = __y;
+    else  // when __z is right child.
+      __z->_M_parent->_M_right = __y;
+    __y->_M_parent = __z->_M_parent;
+    ft::swap(__y->_M_color, __z->_M_color);
+    __y = __z;
+  } else {  // __y == __z
+    __x_parent = __y->_M_parent;
+    if (__x) __x->_M_parent = __y->_M_parent;  // connect __y's parent to __x.
+    if (__root == __z)
+      __root = __x;
+    else if (__z->_M_parent->_M_left == __z)
+      __z->_M_parent->_M_left = __x;
+    else
+      __z->_M_parent->_M_right = __x;
+
+    if (__leftmost == __z) {   // when __z is leftmost.
+      if (__z->_M_right == 0)  // __z->_M_left is also null.
+        __leftmost = __z->_M_parent;
+      else
+        __leftmost = _Rb_tree_node_base::_S_minimum(__x);
+    }
+    if (__rightmost == __z) {  // when __z is rightmost.
+      if (__z->_M_left == 0)
+        __rightmost = __z->_M_parent;
+      else
+        __rightmost = _Rb_tree_node_base::_S_maximum(__x);
+    }
+  }
+
+  // Red-black tree erase rebalance algorithm.
+  if (__y->_M_color == _S_black) {
+    while (__x != __root && (__x == 0 || __x->_M_color == _S_black)) {
+      if (__x == __x_parent->_M_left) {  // __x is left child.
+        _Rb_tree_node_base* __w = __x_parent->_M_right;
+        // case 1: __w(sibling node) is red.
+        if (__w->_M_color == _S_red) {
+          __w->_M_color = _S_black;
+          __x_parent->_M_color = _S_red;
+          _Rb_tree_rotate_left(__x_parent, __root);
+          __w = __x_parent->_M_right;
+        }
+        // case 2: __w(sibling node) is black and __w->_M_left and __w->_M_right
+        // are black.
+        if ((__w->_M_right == 0 || __w->_M_right->_M_color == _S_black) &&
+            (__w->_M_left == 0 || __w->_M_left->_M_color == _S_black)) {
+          __w->_M_color = _S_red;
+          __x = __x_parent;
+          __x_parent = __x_parent->_M_parent;
+        } else {
+          // case 3: __w(sibling node) is black and __w->_M_left is black.
+          if (__w->_M_right == 0 || __w->_M_right->_M_color == _S_black) {
+            __w->_M_left->_M_color = _S_black;
+            __w->_M_color = _S_red;
+            _Rb_tree_rotate_right(__w, __root);
+            __w = __x_parent->_M_right;
+          }
+          // case 4: __w(sibling node) is black and __w->_M_right is red.
+          __w->_M_color = __x_parent->_M_color;
+          __x_parent->_M_color = _S_black;
+          if (__w->_M_right) __w->_M_right->_M_color = _S_black;
+          _Rb_tree_rotate_left(__x_parent, __root);
+          break;
+        }
+      } else {  // __x is right child.
+                // same as above, only left and right are exchanged.
+        _Rb_tree_node_base* __w = __x_parent->_M_left;
+        if (__w->_M_color == _S_red) {
+          __w->_M_color = _S_black;
+          __x_parent->_M_color = _S_red;
+          _Rb_tree_rotate_right(__x_parent, __root);
+          __w = __x_parent->_M_left;
+        }
+        if ((__w->_M_left == 0 || __w->_M_left->_M_color == _S_black) &&
+            (__w->_M_right == 0 || __w->_M_right->_M_color == _S_black)) {
+          __w->_M_color = _S_red;
+          __x = __x_parent;
+          __x_parent = __x_parent->_M_parent;
+        } else {
+          if (__w->_M_left == 0 || __w->_M_left->_M_color == _S_black) {
+            __w->_M_right->_M_color = _S_black;
+            __w->_M_color = _S_red;
+            _Rb_tree_rotate_left(__w, __root);
+            __w = __x_parent->_M_left;
+          }
+          __w->_M_color = __x_parent->_M_color;
+          __x_parent->_M_color = _S_black;
+          if (__w->_M_left) __w->_M_left->_M_color = _S_black;
+          _Rb_tree_rotate_right(__x_parent, __root);
+          break;
+        }
+      }
+    }
+    if (__x) __x->_M_color = _S_black;
+  }
+  return __y;
+}
 
 template <typename _Tp, typename _Alloc>
 class _Rb_tree_alloc_base {
