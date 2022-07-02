@@ -617,16 +617,16 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
 
   iterator       find(const key_type& __x);
   const_iterator find(const key_type& __x) const;
-  // size_type      count(const key_type& __x) const;
+  size_type      count(const key_type& __x) const;
 
-  // iterator       lower_bound(const key_type& __x);
-  // const_iterator lower_bound(const key_type& __x) const;
-  // iterator       upper_bound(const key_type& __x);
-  // const_iterator upper_bound(const key_type& __x) const;
+  iterator       lower_bound(const key_type& __x);
+  const_iterator lower_bound(const key_type& __x) const;
+  iterator       upper_bound(const key_type& __x);
+  const_iterator upper_bound(const key_type& __x) const;
 
-  // ft::pair<iterator, iterator>             equal_range(const key_type& __x);
-  // ft::pair<const_iterator, const_iterator> equal_range(
-  //     const key_type& __x) const;
+  ft::pair<iterator, iterator>             equal_range(const key_type& __x);
+  ft::pair<const_iterator, const_iterator> equal_range(
+      const key_type& __x) const;
 };
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -903,6 +903,109 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::find(
   iterator __j = iterator(__y);
   return (__j == end() || _M_key_compare(__k, _S_key(__j._M_node))) ? end()
                                                                     : __j;
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::size_type
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::count(
+    const _Key& __k) const {
+  const_iterator __p = find(__k);
+  size_type      __n = __p == end() ? 0 : 1;
+  return __n;
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::lower_bound(
+    const _Key& __k) {
+  _Link_type __y = _M_end();
+  _Link_type __x = _M_root();
+
+  while (__x != 0)
+    if (!_M_key_compare(_S_key(__x), __k)) {
+      __y = __x;
+      __x = _S_left(__x);
+    } else
+      __x = _S_right(__x);
+
+  return iterator(__y);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::const_iterator
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::lower_bound(
+    const _Key& __k) const {
+  _Link_type __y = _M_end();
+  _Link_type __x = _M_root();
+
+  while (__x != 0)
+    if (!_M_key_compare(_S_key(__x), __k)) {
+      __y = __x;
+      __x = _S_left(__x);
+    } else
+      __x = _S_right(__x);
+
+  return const_iterator(__y);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::upper_bound(
+    const _Key& __k) {
+  _Link_type __y = _M_end();
+  _Link_type __x = _M_root();
+
+  while (__x != 0)
+    if (_M_key_compare(__k, _S_key(__x))) {
+      __y = __x;
+      __x = _S_left(__x);
+    } else
+      __x = _S_right(__x);
+
+  return iterator(__y);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::const_iterator
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::upper_bound(
+    const _Key& __k) const {
+  _Link_type __y = _M_end();
+  _Link_type __x = _M_root();
+
+  while (__x != 0)
+    if (_M_key_compare(__k, _S_key(__x))) {
+      __y = __x;
+      __x = _S_left(__x);
+    } else
+      __x = _S_right(__x);
+
+  return const_iterator(__y);
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+inline pair<
+    typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
+    typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator>
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::equal_range(
+    const _Key& __k) {
+  return pair<iterator, iterator>(lower_bound(__k), upper_bound(__k));
+}
+
+template <typename _Key, typename _Val, typename _KoV, typename _Compare,
+          typename _Alloc>
+inline pair<
+    typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator,
+    typename _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::const_iterator>
+_Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::equal_range(
+    const _Key& __k) const {
+  return pair<const_iterator, const_iterator>(lower_bound(__k),
+                                              upper_bound(__k));
 }
 
 }  // namespace ft
