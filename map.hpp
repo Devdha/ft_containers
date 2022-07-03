@@ -1,7 +1,10 @@
 #if !defined(MAP_HPP)
 #define MAP_HPP
 
+#include "pair.hpp"
 #include "rbtree.hpp"
+
+namespace ft {
 
 template <typename _Key, typename _T, typename _Compare = std::less<_Key>,
           typename _Alloc = std::allocator<ft::pair<const _Key, _T> > >
@@ -53,7 +56,7 @@ class map {
       const key_compare&    __comp = key_compare(),
       const allocator_type& __alloc = allocator_type())
       : _M_t(__comp, __alloc) {
-    _M_t._M_insert_unique(__first, __last);
+    _M_t.insert_unique(__first, __last);
   }
 
   map(const map& __x) : _M_t(__x._M_t) {}
@@ -78,8 +81,31 @@ class map {
   size_type max_size() const { return _M_t.max_size(); }
 
   mapped_type& operator[](const key_type& __k) {
-    return _M_t._M_insert(_M_t._M_begin(), __k, mapped_type()).first->second;
+    return _M_t._M_insert(_M_t.begin(), __k, mapped_type()).first->second;
   }
+
+  ft::pair<iterator, bool> insert(const value_type& __x) {
+    return _M_t.insert_unique(__x);
+  }
+  iterator insert(iterator __pos, const value_type& __x) {
+    return _M_t.insert_unique(__pos, __x);
+  }
+  template <typename _InputIterator>
+  void insert(_InputIterator __first, _InputIterator __last) {
+    _M_t._M_insert_unique(__first, __last);
+  }
+
+  void      erase(iterator __pos) { _M_t.erase(__pos); }
+  size_type erase(const _Key& k) { return _M_t.erase(k); }
+  void erase(iterator __first, iterator __last) { _M_t.erase(__first, __last); }
+
+  void swap(map& __x) { _M_t.swap(__x._M_t); }
+  void clear() { _M_t.clear(); }
+
+  key_compare   key_comp() const { return _M_t.key_comp(); }
+  value_compare value_comp() const { return value_compare(_M_t.key_comp()); }
 };
+
+}  // namespace ft
 
 #endif  // MAP_HPP
