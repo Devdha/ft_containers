@@ -392,9 +392,7 @@ class _Rb_tree_alloc_base {
 
   _Rb_tree_node<_Tp>* _M_get_node() { return __alloc_type_.allocate(1); }
 
-  void _M_put_node(_Rb_tree_node<_Tp>* __p) {
-    __alloc_type_.deallocate(__p, 1);
-  }
+  void _M_put_node(_Rb_tree_node<_Tp>* __p) { delete __p; }
 };
 
 template <typename _Tp, typename _Alloc>
@@ -569,7 +567,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   iterator       begin() { return _M_leftmost(); }
   const_iterator begin() const { return _M_leftmost(); }
   iterator       end() { return &_M_header; }
-  const_iterator end() const { return &_M_header; }
+  const_iterator end() const { return const_cast<_Base_ptr>(&_M_header); }
 
   reverse_iterator       rbegin() { return reverse_iterator(end()); }
   const_reverse_iterator rbegin() const {
@@ -708,7 +706,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(
   _S_parent(__z) = __y;
   _S_left(__z) = 0;
   _S_right(__z) = 0;
-  _Rb_tree_rebalance(__z, _M_header->_M_parent);
+  _Rb_tree_rebalance(__z, _M_header._M_parent);
   ++_M_node_count;
   return iterator(__z);
 }
@@ -750,7 +748,7 @@ template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
 ft::pair<typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
          bool>
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
-    const value_type& __v) {
+    const _Val& __v) {
   _Link_type __y = _M_end();
   _Link_type __x = _M_root();
   bool       __comp = true;
@@ -826,7 +824,8 @@ template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
 void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(
     iterator __position) {
   _Link_type __y = (_Link_type)_Rb_tree_rebalance_for_erase(
-      __position._M_node, _M_root(), _M_leftmost(), _M_rightmost());
+      __position._M_node, _M_header._M_parent, _M_header._M_left,
+      _M_header._M_right);
   destroy_node(__y);
   --_M_node_count;
 }
@@ -851,6 +850,16 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_erase(
     destroy_node(__x);
     __x = __y;
   }
+}
+
+template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
+          typename _Alloc>
+void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(
+    iterator __first, iterator __last) {
+  if (__first == begin() && __last == end())
+    clear();
+  else
+    while (__first != __last) erase(__first++);
 }
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
