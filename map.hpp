@@ -16,7 +16,18 @@ class map {
   typedef _Compare                 key_compare;
 
  private:
-  typedef ft::_Rb_tree<key_type, value_type, typename value_type::first_type,
+  template <class _Pair>
+  struct _get_First
+      : public std::unary_function<_Pair, typename _Pair::first_type> {
+    typename _Pair::first_type& operator()(_Pair& __x) const {
+      return __x.first;
+    }
+    const typename _Pair::first_type& operator()(const _Pair& __x) const {
+      return __x.first;
+    }
+  };
+
+  typedef ft::_Rb_tree<key_type, value_type, _get_First<value_type>,
                        key_compare, _Alloc>
             _Rep_type;
   _Rep_type _M_t;
@@ -81,18 +92,22 @@ class map {
   size_type max_size() const { return _M_t.max_size(); }
 
   mapped_type& operator[](const key_type& __k) {
-    return _M_t._M_insert(_M_t.begin(), __k, mapped_type()).first->second;
+    iterator __i = _M_t.lower_bound(__k);
+
+    if (__i != end() && !key_comp()(__k, (*__i).first))
+      __i = insert(__i, value_type(__k, mapped_type()));
+    return (*__i).second;
   }
 
   ft::pair<iterator, bool> insert(const value_type& __x) {
-    return _M_t.insert_unique(__x);
+    return _M_t.insert_unique_each(__x);
   }
   iterator insert(iterator __pos, const value_type& __x) {
     return _M_t.insert_unique(__pos, __x);
   }
   template <typename _InputIterator>
   void insert(_InputIterator __first, _InputIterator __last) {
-    _M_t._M_insert_unique(__first, __last);
+    _M_t.insert_unique(__first, __last);
   }
 
   void      erase(iterator __pos) { _M_t.erase(__pos); }
@@ -104,6 +119,30 @@ class map {
 
   key_compare   key_comp() const { return _M_t.key_comp(); }
   value_compare value_comp() const { return value_compare(_M_t.key_comp()); }
+
+  iterator       find(const key_type& __k) { return _M_t.find(__k); }
+  const_iterator find(const key_type& __k) const { return _M_t.find(__k); }
+
+  size_type count(const key_type& __k) const { return _M_t.count(__k); }
+
+  iterator lower_bound(const key_type& __k) { return _M_t.lower_bound(__k); }
+  const_iterator lower_bound(const key_type& __k) const {
+    return _M_t.lower_bound(__k);
+  }
+
+  iterator upper_bound(const key_type& __k) { return _M_t.upper_bound(__k); }
+  const_iterator upper_bound(const key_type& __k) const {
+    return _M_t.upper_bound(__k);
+  }
+
+  pair<iterator, iterator> equal_range(const key_type& __k) {
+    return _M_t.equal_range(__k);
+  }
+  pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
+    return _M_t.equal_range(__k);
+  }
+
+  allocator_type get_allocator() const { return allocator_type(); }
 };
 
 }  // namespace ft
