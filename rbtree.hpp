@@ -380,19 +380,24 @@ class _Rb_tree_alloc_base {
  public:
   typedef _Alloc                                allocator_type;
   typedef std::allocator_traits<allocator_type> _Alloc_traits;
+  typedef typename _Alloc::template rebind<_Rb_tree_node<_Tp> >::other
+      _Node_alloc_type;
 
   allocator_type get_allocator() const { return allocator_type(); }
 
   _Rb_tree_alloc_base(const allocator_type& __a) : __alloc_type_(__a) {}
 
  protected:
-  allocator_type __alloc_type_;
+  allocator_type   __alloc_type_;
+  _Node_alloc_type __node_alloc_;
 
   _Rb_tree_node_base _M_header;
 
-  _Rb_tree_node<_Tp>* _M_get_node() { return __alloc_type_.allocate(1); }
+  _Rb_tree_node<_Tp>* _M_get_node() { return __node_alloc_.allocate(1); }
 
-  void _M_put_node(_Rb_tree_node<_Tp>* __p) { delete __p; }
+  void _M_put_node(_Rb_tree_node<_Tp>* __p) {
+    __node_alloc_.deallocate(__p, 1);
+  }
 };
 
 template <typename _Tp, typename _Alloc>
@@ -545,10 +550,13 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
       clear();
       _M_node_count = 0;
       _M_key_compare = __x._M_key_compare;
-      if (__x._M_root() == 0)
-        _M_empty_initialize();
-      else
+      if (__x._M_root() == 0) {
+        _M_root() = 0;
+        _M_leftmost() = _M_end();
+        _M_rightmost() = _M_end();
+      } else {
         insert_unique(__x.begin(), __x.end());
+      }
     }
     return *this;
   }
@@ -580,13 +588,13 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
 
   bool      empty() const { return _M_node_count == 0; }
   size_type size() const { return _M_node_count; }
-  size_type max_size() const { return size_type(-1); }
+  size_type max_size() const { return size_type(-1) / sizeof(_Rb_tree_node); }
 
   void swap(_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t);
 
-  ft::pair<iterator, bool> insert_unique(const value_type& __x);
+  ft::pair<iterator, bool> insert_unique_each(const _Val& __x);
 
-  iterator insert_unique(iterator __position, const value_type& __x);
+  iterator insert_unique(iterator __position, const _Val& __x);
 
   template <typename _InputIterator>
   void insert_unique(_InputIterator __first, _InputIterator __last);
@@ -693,9 +701,9 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert(
       _M_key_compare(_KeyOfValue()(__v), _S_key(__y))) {
     __z = _M_create_node(__v);
     _S_left(__y) = __z;
-    if (__y == _M_header) {
+    if (__y == &_M_header) {
       _M_root() = __z;
-      _M_rightmost() == __z;
+      _M_rightmost() = __z;
     } else if (__y == _M_leftmost())
       _M_leftmost() = __z;
   } else {
@@ -720,7 +728,7 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
       _M_root() = __t._M_root();
       _M_leftmost() = __t._M_leftmost();
       _M_rightmost() = __t._M_rightmost();
-      _M_root()->_M_parent = __t.end();
+      _M_root()->_M_parent = __t._M_end();
 
       __t._M_root() = 0;
       __t._M_leftmost() = __t._M_end();
@@ -730,7 +738,7 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
     __t._M_root() = _M_root();
     __t._M_leftmost() = _M_leftmost();
     __t._M_rightmost() = _M_rightmost();
-    __t._M_root()->_M_parent = __t.end();
+    __t._M_root()->_M_parent = __t._M_end();
 
     _M_root() = 0;
     _M_leftmost() = _M_end();
@@ -747,7 +755,7 @@ template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
           typename _Alloc>
 ft::pair<typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::iterator,
          bool>
-_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
+_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique_each(
     const _Val& __v) {
   _Link_type __y = _M_end();
   _Link_type __x = _M_root();
@@ -755,7 +763,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
 
   while (__x != 0) {
     __y = __x;
-    __comp = _M_key_compare(_KeyOfValue()((__v), _S_key(__x)));
+    __comp = _M_key_compare(_KeyOfValue()(__v), _S_key(__x));
     __x = __comp ? _S_left(__x) : _S_right(__x);
   }
 
@@ -787,13 +795,13 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
         _M_key_compare(_KeyOfValue()(__v), _S_key(__position._M_node)))
       return _M_insert(__position._M_node, __position._M_node, __v);
     else
-      return insert_unique(__v).first;
+      return insert_unique_each(__v).first;
     // if __postion is end.
   } else if (__position._M_node == &_M_header) {
     if (_M_key_compare(_S_key(_M_rightmost()), _KeyOfValue()(__v)))
       return _M_insert(0, _M_rightmost(), __v);
     else
-      return insert_unique(__v).first;
+      return insert_unique_each(__v).first;
   } else {
     iterator __before = __position;
     --__before;
@@ -806,7 +814,7 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
       else
         return _M_insert(__position._M_node, __position._M_node, __v);
     } else {
-      return insert_unique(__v).first;
+      return insert_unique_each(__v).first;
     }
   }
 }
@@ -816,7 +824,7 @@ template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
 template <class _Iterator>
 void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique(
     _Iterator __first, _Iterator __last) {
-  for (; __first != __last; ++__first) insert_unique(*__first);
+  for (; __first != __last; ++__first) insert_unique_each(*__first);
 }
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -835,8 +843,8 @@ template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
 typename _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::size_type
 _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::erase(const _Key& __x) {
   iterator  __i = find(__x);
-  size_type __n = __n == end() ? 0 : 1;
-  erase(__i);
+  size_type __n = __i == end() ? 0 : 1;
+  if (__n) erase(__i);
   return __n;
 }
 
