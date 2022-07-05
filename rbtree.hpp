@@ -591,12 +591,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
   bool      empty() const { return _M_node_count == 0; }
   size_type size() const { return _M_node_count; }
   size_type max_size() const {
-    // return ft::min<size_type>(_Node_alloc_type().max_size(),
-    // std::numeric_limits<difference_type>::max());
-    // return std::numeric_limits<difference_type>::max() / 2;
-    return std::numeric_limits<difference_type>::max(),
-           std::numeric_limits<size_type>::max() /
-               (sizeof(_Rb_tree_node) + sizeof(value_type));
+    return std::numeric_limits<size_type>::max() / sizeof(_Rb_tree_node);
   }
 
   void swap(_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t);
