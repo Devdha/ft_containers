@@ -404,6 +404,7 @@ template <typename _Tp, typename _Alloc>
 struct _Rb_tree_base : public _Rb_tree_alloc_base<_Tp, _Alloc> {
   typedef _Rb_tree_alloc_base<_Tp, _Alloc> _Base;
   typedef typename _Base::allocator_type   allocator_type;
+  typedef typename _Base::_Node_alloc_type _Node_alloc_type;
 
   _Rb_tree_base(const allocator_type& __a) : _Base(__a) {}
 };
@@ -411,7 +412,8 @@ struct _Rb_tree_base : public _Rb_tree_alloc_base<_Tp, _Alloc> {
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
           typename _Alloc = std::allocator<_Val> >
 class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
-  typedef _Rb_tree_base<_Val, _Alloc> _Base;
+  typedef _Rb_tree_base<_Val, _Alloc>      _Base;
+  typedef typename _Base::_Node_alloc_type _Node_alloc_type;
 
  protected:
   typedef _Rb_tree_node_base* _Base_ptr;
@@ -588,7 +590,14 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
 
   bool      empty() const { return _M_node_count == 0; }
   size_type size() const { return _M_node_count; }
-  size_type max_size() const { return size_type(-1) / sizeof(_Rb_tree_node); }
+  size_type max_size() const {
+    // return ft::min<size_type>(_Node_alloc_type().max_size(),
+    // std::numeric_limits<difference_type>::max());
+    // return std::numeric_limits<difference_type>::max() / 2;
+    return std::numeric_limits<difference_type>::max(),
+           std::numeric_limits<size_type>::max() /
+               (sizeof(_Rb_tree_node) + sizeof(value_type));
+  }
 
   void swap(_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>& __t);
 
@@ -773,9 +782,10 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique_each(
   if (__comp) {
     if (__j == begin())
       return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
-  } else
-    // go back to parent.
-    --__j;
+    else
+      // go back to parent.
+      --__j;
+  }
   // if __x is right side of parent, insert __v on right side of its parent.
   if (_M_key_compare(_S_key(__j._M_node), _KeyOfValue()(__v)))
     return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
