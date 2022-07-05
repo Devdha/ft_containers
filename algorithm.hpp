@@ -134,6 +134,19 @@ void swap(_T& __a, _T& __b) {
   __b = __tmp;
 }
 
+// ================================================================
+// min/max
+
+template <typename _T>
+_T min(const _T& __a, const _T& __b) {
+  return __a < __b ? __a : __b;
+}
+
+template <typename _T>
+_T max(const _T& __a, const _T& __b) {
+  return __a > __b ? __a : __b;
+}
+
 }  // namespace ft
 
 #endif  // ALGORITHM_HPP
