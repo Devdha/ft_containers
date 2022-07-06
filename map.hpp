@@ -92,10 +92,10 @@ class map {
   size_type max_size() const { return _M_t.max_size(); }
 
   mapped_type& operator[](const key_type& __k) {
-    iterator __i = _M_t.lower_bound(__k);
+    iterator __i = lower_bound(__k);
 
-    if (__i != end() && !key_comp()(__k, (*__i).first))
-      __i = insert(__i, value_type(__k, mapped_type()));
+    if (__i == end() || key_comp()(__k, (*__i).first))
+      __i = this->insert(__i, value_type(__k, mapped_type()));
     return (*__i).second;
   }
 
@@ -143,7 +143,58 @@ class map {
   }
 
   allocator_type get_allocator() const { return allocator_type(); }
+
+  template <typename _Key1, typename _Val1, typename _Compare1,
+            typename _Alloc1>
+  friend bool operator==(const map<_Key1, _Val1, _Compare1, _Alloc1>&,
+                         const map<_Key1, _Val1, _Compare1, _Alloc1>&);
+  template <typename _Key1, typename _Val1, typename _Compare1,
+            typename _Alloc1>
+  friend bool operator<(const map<_Key1, _Val1, _Compare1, _Alloc1>&,
+                        const map<_Key1, _Val1, _Compare1, _Alloc1>&);
 };
+
+template <typename _Key, typename _Tp, typename _Compare, typename _Alloc>
+bool operator==(const map<_Key, _Tp, _Compare, _Alloc>& __x,
+                const map<_Key, _Tp, _Compare, _Alloc>& __y) {
+  return __x._M_t == __y._M_t;
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+bool operator!=(const map<_Key, _Val, _Compare, _Alloc>& __x,
+                const map<_Key, _Val, _Compare, _Alloc>& __y) {
+  return !(__x == __y);
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+bool operator<(const map<_Key, _Val, _Compare, _Alloc>& __x,
+               const map<_Key, _Val, _Compare, _Alloc>& __y) {
+  return __x._M_t < __y._M_t;
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+bool operator>(const map<_Key, _Val, _Compare, _Alloc>& __x,
+               const map<_Key, _Val, _Compare, _Alloc>& __y) {
+  return __y < __x;
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+bool operator<=(const map<_Key, _Val, _Compare, _Alloc>& __x,
+                const map<_Key, _Val, _Compare, _Alloc>& __y) {
+  return !(__x > __y);
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+bool operator>=(const map<_Key, _Val, _Compare, _Alloc>& __x,
+                const map<_Key, _Val, _Compare, _Alloc>& __y) {
+  return !(__x < __y);
+}
+
+template <typename _Key, typename _Val, typename _Compare, typename _Alloc>
+void swap(map<_Key, _Val, _Compare, _Alloc>& __x,
+          map<_Key, _Val, _Compare, _Alloc>& __y) {
+  __x.swap(__y);
+}
 
 }  // namespace ft
 

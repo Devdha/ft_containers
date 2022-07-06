@@ -1,6 +1,9 @@
 #if !defined(RBTREE_HPP)
 #define RBTREE_HPP
 
+#include <unistd.h>
+
+#include <iostream>
 #include <memory>
 
 #include "algorithm.hpp"
@@ -537,6 +540,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
       : _Base(__x.get_allocator()),
         _M_node_count(0),
         _M_key_compare(__x._M_key_compare) {
+    _M_empty_initialize();
     if (__x._M_root() == 0)
       _M_empty_initialize();
     else
@@ -558,6 +562,7 @@ class _Rb_tree : protected _Rb_tree_base<_Val, _Alloc> {
         _M_rightmost() = _M_end();
       } else {
         insert_unique(__x.begin(), __x.end());
+        _M_node_count = __x._M_node_count;
       }
     }
     return *this;
@@ -753,6 +758,9 @@ void _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::swap(
     ft::swap(_M_rightmost(), __t._M_rightmost());
     ft::swap(_M_root()->_M_parent, __t._M_root()->_M_parent);
   }
+
+  ft::swap(_M_node_count, __t._M_node_count);
+  ft::swap(_M_key_compare, __t._M_key_compare);
 }
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -777,16 +785,14 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::insert_unique_each(
   if (__comp) {
     if (__j == begin())
       return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
-    else
-      // go back to parent.
+    else  // go back to parent.
       --__j;
   }
   // if __x is right side of parent, insert __v on right side of its parent.
   if (_M_key_compare(_S_key(__j._M_node), _KeyOfValue()(__v)))
     return pair<iterator, bool>(_M_insert(__x, __y, __v), true);
   // it means equal. so return fail.
-  else
-    return pair<iterator, bool>(__j, false);
+  return pair<iterator, bool>(__j, false);
 }
 
 template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
@@ -941,12 +947,13 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::lower_bound(
   _Link_type __y = _M_end();
   _Link_type __x = _M_root();
 
-  while (__x != 0)
+  while (__x != 0) {
     if (!_M_key_compare(_S_key(__x), __k)) {
       __y = __x;
       __x = _S_left(__x);
     } else
       __x = _S_right(__x);
+  }
 
   return iterator(__y);
 }
@@ -959,12 +966,13 @@ _Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::lower_bound(
   _Link_type __y = _M_end();
   _Link_type __x = _M_root();
 
-  while (__x != 0)
+  while (__x != 0) {
     if (!_M_key_compare(_S_key(__x), __k)) {
       __y = __x;
       __x = _S_left(__x);
     } else
       __x = _S_right(__x);
+  }
 
   return const_iterator(__y);
 }
