@@ -152,62 +152,62 @@ struct __type_traits<_T*> {
 };
 
 template <class _T>
-struct _Is_integer {
+struct is_integral {
   typedef __false_type _Integral;
 };
 
 template <>
-struct _Is_integer<bool> {
+struct is_integral<bool> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<char> {
+struct is_integral<char> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<signed char> {
+struct is_integral<signed char> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<unsigned char> {
+struct is_integral<unsigned char> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<wchar_t> {
+struct is_integral<wchar_t> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<short> {
+struct is_integral<short> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<unsigned short> {
+struct is_integral<unsigned short> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<int> {
+struct is_integral<int> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<unsigned int> {
+struct is_integral<unsigned int> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<long> {
+struct is_integral<long> {
   typedef __true_type _Integral;
 };
 
 template <>
-struct _Is_integer<unsigned long> {
+struct is_integral<unsigned long> {
   typedef __true_type _Integral;
 };
 

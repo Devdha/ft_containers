@@ -197,7 +197,7 @@ class vector : private __vector_base<_T, _Allocator> {
   vector(InputIterator __first, InputIterator __last,
          const allocator_type &__a = allocator_type())
       : _base(__a) {
-    typedef typename _Is_integer<InputIterator>::_Integral _Integral;
+    typedef typename is_integral<InputIterator>::_Integral _Integral;
     __initialize_aux(__first, __last, _Integral());
   }
 
@@ -314,7 +314,7 @@ class vector : private __vector_base<_T, _Allocator> {
   // ================================================================
   template <class _InputIterator>
   void assign(_InputIterator __first, _InputIterator __last) {
-    typedef typename _Is_integer<_InputIterator>::_Integral _Integral;
+    typedef typename is_integral<_InputIterator>::_Integral _Integral;
     __assign_aux(__first, __last, _Integral());
   }
 
@@ -339,7 +339,7 @@ class vector : private __vector_base<_T, _Allocator> {
   template <class InputIterator>
   void insert(iterator __position, InputIterator __first,
               InputIterator __last) {
-    typedef typename _Is_integer<InputIterator>::_Integral _Integral;
+    typedef typename is_integral<InputIterator>::_Integral _Integral;
     __insert_dispatch(__position, __first, __last, _Integral());
   }
 
