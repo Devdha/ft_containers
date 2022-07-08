@@ -48,6 +48,11 @@ bool operator>=(const pair<_T1, _T2>& __x, const pair<_T1, _T2>& __y) {
   return !(__x < __y);
 }
 
+template <class _T1, class _T2>
+pair<_T1, _T2> make_pair(_T1 x, _T2 y) {
+  return pair<_T1, _T2>(x, y);
+}
+
 }  // namespace ft
 
 #endif  // PAIR_HPP
