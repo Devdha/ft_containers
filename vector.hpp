@@ -190,7 +190,7 @@ class vector : private __vector_base<_T, _Allocator> {
   explicit vector(size_type __n, const _T &__value = _T(),
                   const allocator_type &__a = allocator_type())
       : _base(__n, __a) {
-    __end_ = std::uninitialized_fill_n(__begin_, __n, __value);
+    __end_ = _fill_n(__begin_, __n, __value);
   }
 
   template <class InputIterator>
@@ -374,9 +374,9 @@ class vector : private __vector_base<_T, _Allocator> {
   }
 
   void swap(vector &__x) {
-    std::swap(__begin_, __x.__begin_);
-    std::swap(__end_, __x.__end_);
-    std::swap(__end_cap_pointer_, __x.__end_cap_pointer_);
+    ft::swap(__begin_, __x.__begin_);
+    ft::swap(__end_, __x.__end_);
+    ft::swap(__end_cap_pointer_, __x.__end_cap_pointer_);
   }
 
   void clear() { erase(begin(), end()); }
