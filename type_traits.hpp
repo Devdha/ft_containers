@@ -116,24 +116,6 @@ struct __type_traits<unsigned long> {
 };
 
 template <>
-struct __type_traits<long long> {
-  typedef __true_type has_trivial_default_constructor;
-  typedef __true_type has_trivial_copy_constructor;
-  typedef __true_type has_trivial_assignment_operator;
-  typedef __true_type has_trivial_destructor;
-  typedef __true_type is_POD_type;
-};
-
-template <>
-struct __type_traits<unsigned long long> {
-  typedef __true_type has_trivial_default_constructor;
-  typedef __true_type has_trivial_copy_constructor;
-  typedef __true_type has_trivial_assignment_operator;
-  typedef __true_type has_trivial_destructor;
-  typedef __true_type is_POD_type;
-};
-
-template <>
 struct __type_traits<float> {
   typedef __true_type has_trivial_default_constructor;
   typedef __true_type has_trivial_copy_constructor;
@@ -228,24 +210,6 @@ template <>
 struct _Is_integer<unsigned long> {
   typedef __true_type _Integral;
 };
-
-template <>
-struct _Is_integer<long long> {
-  typedef __true_type _Integral;
-};
-
-template <>
-struct _Is_integer<unsigned long long> {
-  typedef __true_type _Integral;
-};
-
-template <typename _T>
-struct _Is_normal_iterator {
-  typedef __false_type _Normal;
-};
-
-template <typename _Iterator, typename _Container>
-class __normal_iterator;
 
 }  // namespace ft
 
