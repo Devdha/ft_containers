@@ -1,3 +1,3 @@
-#include "set.hpp"
+#include "test.hpp"
 
-#include <iostream>
+void set_test() {}

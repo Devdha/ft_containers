@@ -1,4 +1,3 @@
-#include "map.hpp"
-#include "rbtree.hpp"
+#include "test.hpp"
 
 int main() { return (0); }

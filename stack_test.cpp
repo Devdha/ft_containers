@@ -1,3 +1,3 @@
-#include "stack.hpp"
+#include "test.hpp"
 
-#include <iostream>
+void stack_test() {}

@@ -1,3 +1,3 @@
-#include "map.hpp"
+#include "test.hpp"
 
-#include <iostream>
+void map_test() {}
