@@ -1,5 +1,4 @@
-#if !defined(VECTOR_HPP)
-#define VECTOR_HPP
+#pragma once
 
 #include <cstddef>
 #include <memory>
@@ -565,5 +564,3 @@ void vector<_T, _Allocator>::__range_insert(iterator       __pos,
 }
 
 }  // namespace ft
-
-#endif  // VECTOR_HPP

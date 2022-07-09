@@ -1,5 +1,4 @@
-#if !defined(MAP_HPP)
-#define MAP_HPP
+#pragma once
 
 #include "pair.hpp"
 #include "rbtree.hpp"
@@ -197,5 +196,3 @@ void swap(map<_Key, _Val, _Compare, _Alloc>& __x,
 }
 
 }  // namespace ft
-
-#endif  // MAP_HPP

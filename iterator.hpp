@@ -1,5 +1,4 @@
-#if !defined(ITERATOR_HPP)
-#define ITERATOR_HPP
+#pragma once
 
 #include <cstddef>
 
@@ -299,5 +298,3 @@ void advance(_InputIterator& __i, _Distance __n) {
 }
 
 }  // namespace ft
-
-#endif  // ITERATOR_HPP

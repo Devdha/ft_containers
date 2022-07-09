@@ -1,5 +1,4 @@
-#if !defined(TYPE_TRAITS_HPP)
-#define TYPE_TRAITS_HPP
+#pragma once
 
 namespace ft {
 
@@ -220,5 +219,3 @@ struct is_integral<unsigned long> {
 };
 
 }  // namespace ft
-
-#endif  // TYPE_TRAITS_HPP

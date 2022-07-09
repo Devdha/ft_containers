@@ -1,5 +1,4 @@
-#if !defined(STACK_HPP)
-#define STACK_HPP
+#pragma once
 
 #include "vector.hpp"
 
@@ -74,5 +73,3 @@ bool operator<=(const stack<_T, _Container>& __x,
 }
 
 }  // namespace ft
-
-#endif  // STACK_HPP

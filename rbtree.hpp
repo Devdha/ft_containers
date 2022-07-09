@@ -1,5 +1,4 @@
-#if !defined(RBTREE_HPP)
-#define RBTREE_HPP
+#pragma once
 
 #include <memory>
 
@@ -1030,5 +1029,3 @@ _Rb_tree<_Key, _Val, _KoV, _Compare, _Alloc>::equal_range(
 }
 
 }  // namespace ft
-
-#endif  // RBTREE_HPP

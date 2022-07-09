@@ -1,5 +1,4 @@
-#if !defined(SET_HPP)
-#define SET_HPP
+#pragma once
 
 #include "algorithm.hpp"
 #include "rbtree.hpp"
@@ -158,5 +157,3 @@ void swap(set<_Key, _Compare, _Alloc>& __x, set<_Key, _Compare, _Alloc>& __y) {
 }
 
 }  // namespace ft
-
-#endif  // SET_HPP

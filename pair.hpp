@@ -1,5 +1,4 @@
-#if !defined(PAIR_HPP)
-#define PAIR_HPP
+#pragma once
 
 namespace ft {
 template <class _T1, class _T2>
@@ -54,5 +53,3 @@ pair<_T1, _T2> make_pair(_T1 x, _T2 y) {
 }
 
 }  // namespace ft
-
-#endif  // PAIR_HPP

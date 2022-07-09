@@ -1,5 +1,4 @@
-#if !defined(ALGORITHM_HPP)
-#define ALGORITHM_HPP
+#pragma once
 
 #include "iterator.hpp"
 #include "type_traits.hpp"
@@ -167,5 +166,3 @@ _T max(const _T& __a, const _T& __b) {
 }
 
 }  // namespace ft
-
-#endif  // ALGORITHM_HPP
