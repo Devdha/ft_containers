@@ -1,9 +1,6 @@
 #if !defined(RBTREE_HPP)
 #define RBTREE_HPP
 
-#include <unistd.h>
-
-#include <iostream>
 #include <memory>
 
 #include "algorithm.hpp"
