@@ -183,6 +183,18 @@ class vector : private __vector_base<_T, _Allocator> {
   void __range_insert(iterator __pos, _InputIterator __first,
                       _InputIterator __last);
 
+  template <class _Integer>
+  void __initialize_aux(_Integer __n, _Integer __value, __true_type) {
+    __begin_ = _allocate(__n);
+    __end_cap_pointer_ = __begin_ + __n;
+    __end_ = _fill_n(__begin_, __n, __value);
+  }
+
+  template <class _InputIterator>
+  void __initialize_aux(_InputIterator __first, _InputIterator __last,
+                        __false_type) {
+    for (; __first != __last; ++__first) push_back(*__first);
+  }
   // ================================================================
  public:
   explicit vector(const allocator_type &__a = allocator_type()) : _base(__a) {}
@@ -204,19 +216,6 @@ class vector : private __vector_base<_T, _Allocator> {
   vector(const vector<_T, _Allocator> &__x)
       : _base(__x.size(), __x.get_allocator()) {
     __end_ = __copy_trivial(__x.begin(), __x.end(), __begin_);
-  }
-
-  template <class _Integer>
-  void __initialize_aux(_Integer __n, _Integer __value, __true_type) {
-    __begin_ = _allocate(__n);
-    __end_cap_pointer_ = __begin_ + __n;
-    __end_ = _fill_n(__begin_, __n, __value);
-  }
-
-  template <class _InputIterator>
-  void __initialize_aux(_InputIterator __first, _InputIterator __last,
-                        __false_type) {
-    for (; __first != __last; ++__first) push_back(*__first);
   }
 
   ~vector() {
