@@ -47,12 +47,17 @@ $(OBJ_DIR)/%.o : %.cpp
 
 all: $(NAME)
 
+diff: $(NAME) $(STD)
+	@./$(NAME) > $(NAME).out
+	@./$(STD) > $(STD).out
+	@diff $(NAME).out $(STD).out
+
 clean :
 	@$(RM) $(OBJ_DIR)
 	@echo "🗑 Remove test OBJs Done"
 
 fclean : clean
-	@$(RM) $(NAME) $(STD)
+	@$(RM) $(NAME) $(STD) $(NAME).out $(STD).out
 	@echo "🗑 Remove test Done"
 
 re:
