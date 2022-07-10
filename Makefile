@@ -9,6 +9,7 @@ VECTOR_SRCS = vector_test.cpp
 VECTOR_OBJS = $(addprefix $(OBJ_DIR)/, $(VECTOR_SRCS:.cpp=.o))
 
 SRCS = main.cpp \
+				test.cpp \
 				vector_test.cpp \
 				map_test.cpp \
 				stack_test.cpp \
@@ -48,11 +49,11 @@ all: $(NAME)
 
 clean :
 	@$(RM) $(OBJ_DIR)
-	@echo "🗑 Remove $(NAME)'s OBJs Done"
+	@echo "🗑 Remove test OBJs Done"
 
 fclean : clean
-	@$(RM) $(NAME)
-	@echo "🗑 Remove $(NAME) Done"
+	@$(RM) $(NAME) $(STD)
+	@echo "🗑 Remove test Done"
 
 re:
 	@make fclean all
