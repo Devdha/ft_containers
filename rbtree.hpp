@@ -152,8 +152,8 @@ bool operator!=(const _Rb_tree_iterator<_Val, _Val&, _Val*>&             __x,
   return __x._M_node != __y._M_node;
 }
 
-void _Rb_tree_rotate_left(_Rb_tree_node_base*  __x,
-                          _Rb_tree_node_base*& __root) {
+inline void _Rb_tree_rotate_left(_Rb_tree_node_base*  __x,
+                                 _Rb_tree_node_base*& __root) {
   // set right node as __y
   _Rb_tree_node_base* __y = __x->_M_right;
   // connect __y's left child to __x's right child.
@@ -172,8 +172,8 @@ void _Rb_tree_rotate_left(_Rb_tree_node_base*  __x,
   __x->_M_parent = __y;
 }
 
-void _Rb_tree_rotate_right(_Rb_tree_node_base*  __x,
-                           _Rb_tree_node_base*& __root) {
+inline void _Rb_tree_rotate_right(_Rb_tree_node_base*  __x,
+                                  _Rb_tree_node_base*& __root) {
   _Rb_tree_node_base* __y = __x->_M_left;
   __x->_M_left = __y->_M_right;
   if (__y->_M_right != 0) __y->_M_right->_M_parent = __x;
@@ -189,7 +189,8 @@ void _Rb_tree_rotate_right(_Rb_tree_node_base*  __x,
   __x->_M_parent = __y;
 }
 
-void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
+inline void _Rb_tree_rebalance(_Rb_tree_node_base*  __x,
+                               _Rb_tree_node_base*& __root) {
   // set new node color red.
   __x->_M_color = _S_red;
   // while node isn't root and node's parent is red.
@@ -242,7 +243,7 @@ void _Rb_tree_rebalance(_Rb_tree_node_base* __x, _Rb_tree_node_base*& __root) {
   __root->_M_color = _S_black;
 }
 
-_Rb_tree_node_base* _Rb_tree_rebalance_for_erase(
+inline _Rb_tree_node_base* _Rb_tree_rebalance_for_erase(
     _Rb_tree_node_base* __z, _Rb_tree_node_base*& __root,
     _Rb_tree_node_base*& __leftmost, _Rb_tree_node_base*& __rightmost) {
   _Rb_tree_node_base* __y = __z;

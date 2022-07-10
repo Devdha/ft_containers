@@ -5,13 +5,13 @@
 #include <set>
 #include <stack>
 #include <vector>
-using namespace std;
+#define NAME_SPACE std
 #else
 #include "map.hpp"
 #include "set.hpp"
 #include "stack.hpp"
 #include "vector.hpp"
-using namespace ft;
+#define NAME_SPACE ft
 #endif
 
 #include <ctime>

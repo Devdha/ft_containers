@@ -16,29 +16,31 @@ namespace ft {
 
 // ================================================================
 // fill
-void _fill(unsigned char* __first, unsigned char* __last,
-           const unsigned char& __c) {
+inline void _fill(unsigned char* __first, unsigned char* __last,
+                  const unsigned char& __c) {
   unsigned char __tmp = __c;
   memset(__first, __tmp, __last - __first);
 }
 
-void _fill(signed char* __first, signed char* __last, const signed char& __c) {
+inline void _fill(signed char* __first, signed char* __last,
+                  const signed char& __c) {
   signed char __tmp = __c;
   memset(__first, static_cast<unsigned char>(__tmp), __last - __first);
 }
 
-void _fill(char* __first, char* __last, const char& __c) {
+inline void _fill(char* __first, char* __last, const char& __c) {
   char __tmp = __c;
   memset(__first, static_cast<unsigned char>(__tmp), __last - __first);
 }
 
 template <typename _ForwardIter, typename _T>
-void _fill(_ForwardIter __first, _ForwardIter __last, const _T& __value) {
+inline void _fill(_ForwardIter __first, _ForwardIter __last,
+                  const _T& __value) {
   for (; __first != __last; ++__first) *__first = __value;
 }
 
 template <typename _T, typename _Size>
-_T* _fill_n(_T* __first, _Size __n, const _T& __c) {
+inline _T* _fill_n(_T* __first, _Size __n, const _T& __c) {
   for (_Size i = 0; i < __n; i++) *(__first + i) = __c;
   return __first + __n;
 }
