@@ -17,6 +17,7 @@
 #include <ctime>
 #include <iostream>
 
+void print_container_name(const char* container_name);
 void print_testname(const char* testname);
 
 void vector_test();
