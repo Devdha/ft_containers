@@ -28,7 +28,7 @@ OBJ_DIR = ./obj
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
 $(NAME): $(OBJS) $(INCS)
-	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@ -D $(NAME)
+	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 	@printf "💡 Make $(NAME) Done\n"
 
 $(STD): $(OBJS) $(INCS)
