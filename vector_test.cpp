@@ -1,6 +1,8 @@
 #include "test.hpp"
 
 void vector_constructor() {
+  // ===========================================================================
+  print_testname("constructor");
   NAME_SPACE::vector<int> first;           // empty NAME_SPACE::vector of ints
   NAME_SPACE::vector<int> second(4, 100);  // four ints with value 100
   NAME_SPACE::vector<int> third(second.begin(),
@@ -19,6 +21,8 @@ void vector_constructor() {
 }
 
 void vector_copy_operator() {
+  // ===========================================================================
+  print_testname("copy constructor");
   NAME_SPACE::vector<int> foo(3, 0);
   NAME_SPACE::vector<int> bar(5, 0);
 
@@ -282,6 +286,7 @@ void vector_allocator() {
 }
 
 void vector_test() {
+  print_container_name("VECTOR");
   vector_constructor();
   vector_iterators();
   vector_capacity();
