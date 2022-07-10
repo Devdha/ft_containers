@@ -1,3 +1,6 @@
 #include "test.hpp"
 
-int main() { return (0); }
+int main() {
+  vector_test();
+  return (0);
+}

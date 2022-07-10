@@ -17,6 +17,8 @@
 #include <ctime>
 #include <iostream>
 
+void print_testname(const char* testname);
+
 void vector_test();
 void map_test();
 void stack_test();
