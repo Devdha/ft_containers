@@ -3,10 +3,6 @@ CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 RM = rm -rf
 NAME = ft
 STD = std
-VECTOR = vector
-
-VECTOR_SRCS = vector_test.cpp
-VECTOR_OBJS = $(addprefix $(OBJ_DIR)/, $(VECTOR_SRCS:.cpp=.o))
 
 SRCS = main.cpp \
 				test.cpp \
@@ -35,12 +31,6 @@ $(STD): $(OBJS) $(INCS)
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $@ -D $(STD)
 	@printf "💡 Make $(STD) Done\n"
 
-
-$(VECTOR): $(VECTOR_OBJS) $(INCS)
-	@$(CXX) $(CXXFLAGS) $(VECTOR_OBJS) -o $@
-	@printf "💡 Make $(VECTOR) Done\n"
-	@./vector
-
 $(OBJ_DIR)/%.o : %.cpp
 	@mkdir -p $(OBJ_DIR)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@ -g
@@ -50,7 +40,8 @@ all: $(NAME)
 diff: $(NAME) $(STD)
 	@./$(NAME) > $(NAME).out
 	@./$(STD) > $(STD).out
-	@diff $(NAME).out $(STD).out
+	@printf "🍽  "
+	diff $(NAME).out $(STD).out
 
 clean :
 	@$(RM) $(OBJ_DIR)
