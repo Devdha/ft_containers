@@ -2,5 +2,15 @@
 
 int main() {
   vector_test();
-  return (0);
+  map_test();
+
+  // const char *leak_check;
+  //
+  // #ifdef STD
+  //   leak_check = "leaks std";
+  // #else
+  //   leak_check = "leaks ft";
+  // #endif
+  //   system(leak_check);
+  //   return (0);
 }
