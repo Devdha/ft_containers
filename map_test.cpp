@@ -371,6 +371,7 @@ void map_allocator() {
 }
 
 void map_test() {
+  print_container_name("MAP");
   map_constructor();
   map_copy_operator();
   map_iterators();
