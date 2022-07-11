@@ -7,7 +7,7 @@ int main() {
   map_test();
   set_test();
   stack_test();
-  util_test();
+  // util_test();
 
 #ifdef STD
   std::cout << "It's STD version" << std::endl;
