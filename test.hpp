@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(STD)
+#if STD
 #include <map>
 #include <set>
 #include <stack>

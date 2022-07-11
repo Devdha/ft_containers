@@ -4,11 +4,15 @@ void stack_constructor() {
   // ===========================================================================
   print_testname("constructor");
 
-  NAME_SPACE::vector<int> myvector(2, 200);  // vector with 2 elements
+#ifdef STD
+  NAME_SPACE::deque<int> my_container(2, 200);  // _container with 2 elements
+#else
+  NAME_SPACE::vector<int> my_container(2, 200);  // _container with 2 elements
+#endif
 
   NAME_SPACE::stack<int> first;  // empty stack
-  NAME_SPACE::stack<int> second(
-      myvector);  // stack initialized to copy of deque
+  NAME_SPACE::stack<int> second(my_container);
+
   std::cout << "size of first: " << first.size() << '\n';
   std::cout << "size of second: " << second.size() << '\n';
 }
