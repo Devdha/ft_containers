@@ -22,29 +22,29 @@ typedef integral_constant<bool, true>  true_type;
 typedef integral_constant<bool, false> false_type;
 
 template <typename T>
-struct _is_integral : public false_type {};
+struct is_integral : public false_type {};
 template <>
-struct _is_integral<bool> : public true_type {};
+struct is_integral<bool> : public true_type {};
 template <>
-struct _is_integral<char> : public true_type {};
+struct is_integral<char> : public true_type {};
 template <>
-struct _is_integral<unsigned char> : public true_type {};
+struct is_integral<unsigned char> : public true_type {};
 template <>
-struct _is_integral<signed char> : public true_type {};
+struct is_integral<signed char> : public true_type {};
 template <>
-struct _is_integral<wchar_t> : public true_type {};
+struct is_integral<wchar_t> : public true_type {};
 template <>
-struct _is_integral<short> : public true_type {};
+struct is_integral<short> : public true_type {};
 template <>
-struct _is_integral<unsigned short> : public true_type {};
+struct is_integral<unsigned short> : public true_type {};
 template <>
-struct _is_integral<int> : public true_type {};
+struct is_integral<int> : public true_type {};
 template <>
-struct _is_integral<unsigned int> : public true_type {};
+struct is_integral<unsigned int> : public true_type {};
 template <>
-struct _is_integral<long> : public true_type {};
+struct is_integral<long> : public true_type {};
 template <>
-struct _is_integral<unsigned long> : public true_type {};
+struct is_integral<unsigned long> : public true_type {};
 
 struct __true_type {};
 struct __false_type {};
