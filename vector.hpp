@@ -416,6 +416,11 @@ bool operator>=(const vector<_T, _Alloc> &__x, const vector<_T, _Alloc> &__y) {
   return !(__x < __y);
 }
 
+template <class _T, class _Alloc>
+void swap(vector<_T, _Alloc> &__x, vector<_T, _Alloc> &__y) {
+  __x.swap(__y);
+}
+
 // ================================================================
 
 template <class _T, class _Allocator>
