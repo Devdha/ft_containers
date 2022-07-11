@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
   int sum = 0;
   for (int i = 0; i < 10000; i++) {
-    int access = rand();
+    int access = rand() % COUNT;
     sum += map_int[access];
   }
   std::cout << "should be constant with the same seed: " << sum << std::endl;
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
 
   int sum = 0;
   for (int i = 0; i < 10000; i++) {
-    int access = rand();
+    int access = rand() % COUNT;
     sum += map_int[access];
   }
   std::cout << "should be constant with the same seed: " << sum << std::endl;
@@ -178,6 +178,7 @@ int main(int argc, char** argv) {
     std::cout << *it;
   }
   std::cout << std::endl;
+
   return (0);
 }
 
