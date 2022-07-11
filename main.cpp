@@ -4,6 +4,7 @@ int main() {
   vector_test();
   map_test();
   set_test();
+  stack_test();
 
   // const char *leak_check;
   //
