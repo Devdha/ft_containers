@@ -6,7 +6,7 @@ namespace ft {
 
 template <typename _T, typename _Container = ft::vector<_T> >
 class stack {
- private:
+ protected:
   _Container _M_t;
 
  public:
